@@ -50,6 +50,8 @@ body {
 
 <!-- CONTENT -->
 <div class="container-fluid px-4 mt-4">
+    <div id="pageAlert" class="alert alert-danger d-none" role="alert"></div>
+
     <div class="row g-4">
 
         <!-- Attendance -->
@@ -57,8 +59,8 @@ body {
             <div class="card-box">
                 <h5 class="fw-bold mb-3">Today's Attendance</h5>
 
-                <button id="checkBtn" class="btn btn-primary w-100 mb-3" onclick="toggleCheck()">
-                    Check In
+                <button id="checkBtn" class="btn btn-primary w-100 mb-3" onclick="handleCheck()">
+                    Loading...
                 </button>
 
                 <div class="row text-center">
@@ -82,10 +84,10 @@ body {
         <div class="col-lg-6">
             <div class="card-box">
                 <h5 class="fw-bold mb-3">My Info</h5>
-                <p><strong>Name:</strong> John Doe</p>
-                <p><strong>Employee ID:</strong> EMP101</p>
-                <p><strong>Department:</strong> Product</p>
-                <p><strong>Location:</strong> Ahmedabad</p>
+                <p><strong>Name:</strong> <span id="empName">-</span></p>
+                <p><strong>Employee ID:</strong> <span id="empId">-</span></p>
+                <p><strong>Department:</strong> <span id="empDept">-</span></p>
+                <p><strong>Position:</strong> <span id="empPos">-</span></p>
             </div>
         </div>
 
@@ -95,15 +97,15 @@ body {
                 <h5 class="fw-bold mb-3">This Month</h5>
                 <div class="row text-center">
                     <div class="col">
-                        <div class="fs-4 fw-bold">18</div>
+                        <div id="presentCount" class="fs-4 fw-bold">0</div>
                         <small class="text-muted">Present</small>
                     </div>
                     <div class="col">
-                        <div class="fs-4 fw-bold">2</div>
+                        <div id="absentCount" class="fs-4 fw-bold">0</div>
                         <small class="text-muted">Absent</small>
                     </div>
                     <div class="col">
-                        <div class="fs-4 fw-bold">1</div>
+                        <div id="leaveCount" class="fs-4 fw-bold">0</div>
                         <small class="text-muted">Leave</small>
                     </div>
                 </div>
@@ -114,8 +116,7 @@ body {
         <div class="col-lg-6">
             <div class="card-box">
                 <h5 class="fw-bold mb-3">Time Off</h5>
-                <p><strong>Leave Balance:</strong> 12 days</p>
-                <p><strong>Pending Requests:</strong> 1</p>
+                <p><strong>Pending Requests:</strong> <span id="pendingLeaves">0</span></p>
                 <button class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#applyLeaveModal">
                     Apply for Leave
                 </button>
@@ -144,9 +145,9 @@ body {
                         <label class="form-label" style="font-size: 13px; font-weight: 600; color: #0f172a;">Time off Type</label>
                         <select class="form-select" id="leaveType" required>
                             <option value="">Select type</option>
-                            <option value="paid">Paid Time Off</option>
-                            <option value="sick">Sick Leave</option>
-                            <option value="unpaid">Unpaid Leave</option>
+                            <option value="Paid">Paid Time Off</option>
+                            <option value="Sick">Sick Leave</option>
+                            <option value="Unpaid">Unpaid Leave</option>
                         </select>
                     </div>
 
@@ -209,64 +210,137 @@ document.addEventListener('DOMContentLoaded', function () {
   fetch('navbar.html')
     .then(res => res.text())
     .then(html => {
-      document.getElementById('employee-navbar').innerHTML = html;
+            const host = document.getElementById('employee-navbar');
+            host.innerHTML = html;
+            host.querySelectorAll('script').forEach(oldScript => {
+                const s = document.createElement('script');
+                if (oldScript.src) {
+                    s.src = oldScript.src;
+                } else {
+                    s.textContent = oldScript.textContent;
+                }
+                host.appendChild(s);
+            });
     })
     .catch(err => console.error('Employee navbar load failed', err));
 });
 </script>
 
-<!-- DASHBOARD CHECK-IN LOGIC -->
+<!-- DASHBOARD CHECK-IN LOGIC (BACKEND INTEGRATED) -->
 <script>
-let checkedIn = false;
-let checkInTimestamp = null;
-let checkOutTimestamp = null;
+const API_BASE = '/hrms/backend';
+const alertBox = document.getElementById('pageAlert');
 
-function formatTime(date) {
-    let hours = date.getHours();
-    let minutes = date.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    minutes = minutes < 10 ? '0' + minutes : minutes;
-    return hours + ':' + minutes + ' ' + ampm;
-}
+const showPageAlert = (msg, type = 'danger') => {
+    alertBox.classList.remove('d-none', 'alert-success', 'alert-danger');
+    alertBox.classList.add(`alert-${type}`);
+    alertBox.textContent = msg;
+};
 
-function calculateWorkingHours(checkIn, checkOut) {
-    const diffMs = checkOut - checkIn;
-    const diffHours = diffMs / (1000 * 60 * 60);
-    return diffHours.toFixed(2);
-}
-
-function toggleCheck() {
-    const btn = document.getElementById('checkBtn');
-    const now = new Date();
-
-    if (!checkedIn) {
-        // Check In
-        checkInTimestamp = now;
-        document.getElementById('inTime').textContent = formatTime(now);
-        btn.textContent = "Check Out";
-        checkedIn = true;
-    } else {
-        // Check Out
-        checkOutTimestamp = now;
-        document.getElementById('outTime').textContent = formatTime(now);
-        
-        if (checkInTimestamp) {
-            const hours = calculateWorkingHours(checkInTimestamp, checkOutTimestamp);
-            document.getElementById('hours').textContent = hours;
-        }
-        
-        btn.textContent = "Check In";
-        checkedIn = false;
+const api = async (path, options = {}) => {
+    const res = await fetch(`${API_BASE}${path}`, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        ...options
+    });
+    if (res.status === 401) {
+        window.location.href = '/hrms/frontend/auth/login.html';
+        return null;
     }
-}
+    return res.json();
+};
+
+const state = {
+    todayRecord: null
+};
+
+const fmtTime = (value) => {
+    if (!value) return '--';
+    const [h, m] = value.split(':');
+    const hours = parseInt(h, 10);
+    const minutes = parseInt(m, 10);
+    const suffix = hours >= 12 ? 'PM' : 'AM';
+    const displayHour = ((hours + 11) % 12) + 1;
+    const displayMin = minutes.toString().padStart(2, '0');
+    return `${displayHour}:${displayMin} ${suffix}`;
+};
+
+const loadProfile = async () => {
+    const data = await api('/employee/profile.php');
+    if (!data || !data.success) return showPageAlert(data?.message || 'Failed to load profile');
+    const p = data.data;
+    document.getElementById('empName').textContent = p.name || '-';
+    document.getElementById('empId').textContent = p.employee_id || '-';
+    document.getElementById('empDept').textContent = p.department || '-';
+    document.getElementById('empPos').textContent = p.position || '-';
+};
+
+const loadTodayAttendance = async () => {
+    const data = await api('/employee/attendance.php?action=today');
+    const btn = document.getElementById('checkBtn');
+    if (!data || !data.success) {
+        btn.textContent = 'Check In';
+        return showPageAlert(data?.message || 'Failed to load attendance');
+    }
+
+    const rec = data.data;
+    state.todayRecord = rec;
+    document.getElementById('inTime').textContent = fmtTime(rec?.check_in_time);
+    document.getElementById('outTime').textContent = fmtTime(rec?.check_out_time);
+    document.getElementById('hours').textContent = rec?.working_hours ? Number(rec.working_hours).toFixed(2) : '0';
+
+    if (!rec) {
+        btn.textContent = 'Check In';
+        btn.disabled = false;
+    } else if (rec && !rec.check_out_time) {
+        btn.textContent = 'Check Out';
+        btn.disabled = false;
+    } else {
+        btn.textContent = 'Done for Today';
+        btn.disabled = true;
+    }
+};
+
+const handleCheck = async () => {
+    const btn = document.getElementById('checkBtn');
+    btn.disabled = true;
+    const action = state.todayRecord && !state.todayRecord.check_out_time ? 'checkout' : 'checkin';
+
+    const data = await api('/employee/attendance.php', {
+        method: 'POST',
+        body: JSON.stringify({ action })
+    });
+
+    if (!data || !data.success) {
+        btn.disabled = false;
+        return showPageAlert(data?.message || 'Attendance update failed');
+    }
+
+    showPageAlert(data.message || 'Updated', 'success');
+    await loadTodayAttendance();
+};
+
+const loadSummary = async () => {
+    const data = await api('/employee/attendance.php?action=summary');
+    if (!data || !data.success) return;
+    const s = data.data || {};
+    document.getElementById('presentCount').textContent = s.present_days || 0;
+    document.getElementById('absentCount').textContent = s.absent_days || 0;
+    document.getElementById('leaveCount').textContent = s.leave_days || 0;
+};
+
+const loadPendingLeaves = async () => {
+    const data = await api('/employee/leave.php');
+    if (!data || !data.success) return;
+    const pending = (data.data || []).filter(l => l.status === 'Pending').length;
+    document.getElementById('pendingLeaves').textContent = pending;
+};
 
 // Show/hide attachment field based on leave type
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('leaveType').addEventListener('change', function() {
         var attachmentSection = document.getElementById('attachmentSection');
-        if (this.value === 'sick') {
+        if (this.value === 'Sick') {
             attachmentSection.style.display = 'block';
         } else {
             attachmentSection.style.display = 'none';
@@ -294,12 +368,11 @@ function calculateDays() {
     }
 }
 
-// Submit leave request
-function submitLeave() {
+// Submit leave request to backend
+async function submitLeave() {
     var leaveType = document.getElementById('leaveType').value;
     var startDate = document.getElementById('startDate').value;
     var endDate = document.getElementById('endDate').value;
-    var leaveDays = document.getElementById('leaveDays').value;
     var reason = document.getElementById('reason').value;
 
     if (!leaveType || !startDate || !endDate) {
@@ -315,14 +388,38 @@ function submitLeave() {
         return;
     }
 
-    alert('Leave request submitted successfully! Your request is pending approval.');
+    const res = await api('/employee/leave.php', {
+        method: 'POST',
+        body: JSON.stringify({
+            leave_type: leaveType,
+            start_date: startDate,
+            end_date: endDate,
+            reason
+        })
+    });
+
+    if (!res || !res.success) {
+        alert(res?.message || 'Failed to submit leave');
+        return;
+    }
+
+    alert('Leave request submitted and pending approval.');
 
     // Close modal and reset form
     var modal = bootstrap.Modal.getInstance(document.getElementById('applyLeaveModal'));
     modal.hide();
     document.getElementById('leaveForm').reset();
     document.getElementById('attachmentSection').style.display = 'none';
+    loadPendingLeaves();
 }
+
+// Init
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadProfile();
+    await loadTodayAttendance();
+    await loadSummary();
+    await loadPendingLeaves();
+});
 </script>
 
 </body>

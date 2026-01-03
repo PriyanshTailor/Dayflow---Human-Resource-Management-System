@@ -195,14 +195,14 @@ body {
                             <input id="notes" type="text" class="form-control" placeholder="Optional remarks">
                         </div>
                     </div>
+                    
+                    <!-- Buttons inside form -->
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" onclick="goBack()">Cancel</button>
+                        <button class="btn btn-primary" type="submit" id="saveEmployeeBtn">Save Employee</button>
+                    </div>
 
                 </form>
-            </div>
-
-            <!-- Footer -->
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" onclick="goBack()">Cancel</button>
-                <button class="btn btn-primary" type="button" onclick="submitEmployee(event)">Save Employee</button>
             </div>
 
         </div>
@@ -217,29 +217,56 @@ function loadAdminNavbar() {
     var host = document.getElementById('admin-navbar');
     if (!host) return;
     fetch('navbar.html')
-        .then(function (res) { return res.text(); })
-        .then(function (html) { host.innerHTML = html; })
+            .then(function (res) { return res.text(); })
+            .then(function (html) {
+                host.innerHTML = html;
+                host.querySelectorAll('script').forEach(function (oldScript) {
+                    var s = document.createElement('script');
+                    if (oldScript.src) {
+                        s.src = oldScript.src;
+                    } else {
+                        s.textContent = oldScript.textContent;
+                    }
+                    host.appendChild(s);
+                });
+            })
         .catch(function (err) { console.error('Failed to load navbar', err); });
 }
 
-document.addEventListener('DOMContentLoaded', loadAdminNavbar);
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, setting up form...');
+    loadAdminNavbar();
+    
+    // Attach form submit handler
+    const form = document.getElementById('addEmployeeForm');
+    console.log('Form found:', form);
+    if (form) {
+        form.addEventListener('submit', submitEmployee);
+        console.log('Submit handler attached');
+    } else {
+        console.error('Form not found!');
+    }
+});
 
-const form = document.getElementById('addEmployeeForm');
-const alertBox = document.getElementById('alertBox');
-const idInput = document.getElementById('empId');
-const nameInput = document.getElementById('fullName');
-const emailInput = document.getElementById('email');
-const deptInput = document.getElementById('department');
-const roleInput = document.getElementById('role');
-const typeInput = document.getElementById('employmentType');
-const statusInput = document.getElementById('status');
-const joinInput = document.getElementById('joiningDate');
-
+const API_BASE = '/hrms/backend';
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const idRegex = /^[A-Za-z0-9._-]{3,}$/;
 
-function submitEmployee(event) {
+async function submitEmployee(event) {
     event.preventDefault();
+    console.log('Submit function called!');
+    
+    // Get elements inside function to ensure DOM is loaded
+    const alertBox = document.getElementById('alertBox');
+    const idInput = document.getElementById('empId');
+    const nameInput = document.getElementById('fullName');
+    const emailInput = document.getElementById('email');
+    const deptInput = document.getElementById('department');
+    const roleInput = document.getElementById('role');
+    const typeInput = document.getElementById('employmentType');
+    const statusInput = document.getElementById('status');
+    const joinInput = document.getElementById('joiningDate');
+    
     const errors = [];
 
     const empId = idInput.value.trim();
@@ -293,6 +320,7 @@ function submitEmployee(event) {
     }
 
     if (errors.length) {
+        console.log('Validation errors:', errors);
         alertBox.classList.remove('d-none', 'alert-success');
         alertBox.classList.add('alert-danger');
         alertBox.innerHTML = '<ul class="mb-0">' + errors.map(function (err) {
@@ -301,13 +329,57 @@ function submitEmployee(event) {
         return;
     }
 
-    alertBox.classList.remove('d-none', 'alert-danger');
-    alertBox.classList.add('alert-success');
-    alertBox.textContent = 'Employee added successfully (demo).';
-
-    setTimeout(function () {
-        window.location.href = 'dashboard.html';
-    }, 500);
+    console.log('Validation passed, submitting to backend...');
+    
+    // Submit to backend
+    try {
+        const payload = {
+            employee_id: empId,
+            name: fullName,
+            email: email,
+            department: dept,
+            position: role,
+            date_of_joining: joinDate || new Date().toISOString().split('T')[0]
+        };
+        console.log('Payload:', payload);
+        
+        const response = await fetch(API_BASE + '/admin/add-employee-simple.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+        
+        console.log('Response status:', response.status);
+        
+        if (response.status === 401) {
+            window.location.href = '/hrms/frontend/auth/login.html';
+            return;
+        }
+        
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        if (data.success) {
+            alertBox.classList.remove('d-none', 'alert-danger');
+            alertBox.classList.add('alert-success');
+            alertBox.textContent = 'Employee added successfully!';
+            
+            setTimeout(function () {
+                window.location.href = 'dashboard.html';
+            }, 500);
+        } else {
+            console.error('Server error:', data.message);
+            alertBox.classList.remove('d-none', 'alert-success');
+            alertBox.classList.add('alert-danger');
+            alertBox.textContent = data.message || 'Failed to add employee';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alertBox.classList.remove('d-none', 'alert-success');
+        alertBox.classList.add('alert-danger');
+        alertBox.textContent = 'Failed to add employee: ' + error.message;
+    }
 }
 
 function goBack() {

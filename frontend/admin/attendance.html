@@ -118,15 +118,21 @@
 		.summary-value { font-size: 18px; font-weight: 800; color: #111827; }
 		.summary-sub { font-size: 12px; color: var(--muted); }
 
-		table { font-size: 14px; }
-		thead th { background: #f8fafc; font-weight: 700; color: #111827; }
+		tbody tr { transition: all 0.2s ease; border-bottom: 1px solid #f1f5f9; }
+		tbody tr:hover { background: #fafafa; }
 		tbody td { vertical-align: middle; }
 		.status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
 		.dot-present { background: #22c55e; }
 		.dot-absent { background: #eab308; }
 		.dot-leave { background: #0ea5e9; }
+		.dot-pending { background: #f59e0b; }
 
-		.badge-soft { background: #eef2ff; color: #4338ca; font-weight: 700; }
+		.action-btns { display: flex; gap: 6px; }
+		.btn-approve { background: #22c55e; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+		.btn-approve:hover { background: #16a34a; }
+		.btn-reject { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+		.btn-reject:hover { background: #dc2626; }
+		.badge-soft { background: #eef2ff; color: #4338ca; font-weight: 700; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
 
 		@media (max-width: 768px) {
 			.control-bar { grid-template-columns: 1fr; }
@@ -176,16 +182,17 @@
 			<table class="table table-bordered align-middle mb-2" id="attendanceTable">
 				<thead>
 					<tr>
-						<th style="width: 26%">Employee</th>
-						<th style="width: 14%">Check In</th>
-						<th style="width: 14%">Check Out</th>
-						<th style="width: 14%">Work Hours</th>
-						<th style="width: 14%">Extra Hours</th>
-						<th style="width: 18%">Status</th>
+						<th style="width: 20%">Employee</th>
+						<th style="width: 12%">Check In</th>
+						<th style="width: 12%">Check Out</th>
+						<th style="width: 12%">Work Hours</th>
+						<th style="width: 12%">Extra Hours</th>
+						<th style="width: 12%">Status</th>
+						<th style="width: 20%">Action</th>
 					</tr>
 				</thead>
 				<tbody id="attendanceBody">
-					<tr><td colspan="6" class="text-center text-muted py-4">Loading...</td></tr>
+					<tr><td colspan="7" class="text-center text-muted py-4">Loading...</td></tr>
 				</tbody>
 			</table>
 		</div>
@@ -199,27 +206,51 @@
 		if (!host) return;
 		fetch('navbar.html')
 			.then(function (res) { return res.text(); })
-			.then(function (html) { host.innerHTML = html; })
+			.then(function (html) {
+				host.innerHTML = html;
+				host.querySelectorAll('script').forEach(function (oldScript) {
+					var s = document.createElement('script');
+					if (oldScript.src) {
+						s.src = oldScript.src;
+					} else {
+						s.textContent = oldScript.textContent;
+					}
+					host.appendChild(s);
+				});
+			})
 			.catch(function (err) { console.error('Failed to load navbar', err); });
 	}
 
 	document.addEventListener('DOMContentLoaded', loadAdminNavbar);
 
-	var data = [
-		{ date: '2026-01-03', empId: 'EMP101', name: 'John Doe', role: 'Product', checkIn: '09:58', checkOut: '18:10', breaks: 45, status: 'present' },
-		{ date: '2026-01-03', empId: 'EMP102', name: 'Alice Smith', role: 'CX', checkIn: null, checkOut: null, breaks: 0, status: 'absent' },
-		{ date: '2026-01-03', empId: 'EMP103', name: 'Robert Lee', role: 'Design', checkIn: '10:10', checkOut: '19:45', breaks: 60, status: 'present' },
-		{ date: '2026-01-03', empId: 'EMP104', name: 'Priya Shah', role: 'HR', checkIn: '08:50', checkOut: '17:15', breaks: 50, status: 'present' },
-		{ date: '2026-01-03', empId: 'EMP105', name: 'David Kim', role: 'Engineering', checkIn: null, checkOut: null, breaks: 0, status: 'leave' },
-		{ date: '2026-01-02', empId: 'EMP101', name: 'John Doe', role: 'Product', checkIn: '09:50', checkOut: '18:05', breaks: 40, status: 'present' },
-		{ date: '2026-01-02', empId: 'EMP102', name: 'Alice Smith', role: 'CX', checkIn: '10:05', checkOut: '18:20', breaks: 55, status: 'present' },
-		{ date: '2026-01-02', empId: 'EMP103', name: 'Robert Lee', role: 'Design', checkIn: '10:30', checkOut: '19:20', breaks: 45, status: 'present' },
-		{ date: '2026-01-02', empId: 'EMP104', name: 'Priya Shah', role: 'HR', checkIn: '09:00', checkOut: '17:10', breaks: 50, status: 'present' },
-		{ date: '2026-01-02', empId: 'EMP105', name: 'David Kim', role: 'Engineering', checkIn: null, checkOut: null, breaks: 0, status: 'leave' }
-	];
+	const API_BASE = '/hrms/backend';
+	let attendanceData = [];
+	let currentDate = new Date();
+	let searchTerm = '';
 
-	var currentDate = new Date();
-	var searchTerm = '';
+	async function loadAttendanceData() {
+		try {
+			const iso = toISODate(currentDate);
+			const response = await fetch(API_BASE + '/admin/attendance.php?date=' + iso, {
+				credentials: 'include'
+			});
+
+			if (response.status === 401) {
+				window.location.href = '/hrms/frontend/auth/login.html';
+				return;
+			}
+
+			const data = await response.json();
+			if (data.success && data.data) {
+				attendanceData = data.data;
+			} else {
+				attendanceData = [];
+			}
+		} catch (error) {
+			console.error('Error loading attendance:', error);
+			attendanceData = [];
+		}
+	}
 
 	function toISODate(d) {
 		return d.toISOString().slice(0, 10);
@@ -246,18 +277,20 @@
 	}
 
 	function computeWorkMinutes(entry) {
-		var start = parseTimeToMinutes(entry.checkIn);
-		var end = parseTimeToMinutes(entry.checkOut);
+		var start = parseTimeToMinutes(entry.check_in_time);
+		var end = parseTimeToMinutes(entry.check_out_time);
 		if (start === null || end === null) return null;
-		var duration = end - start - (entry.breaks || 0);
+		var duration = end - start;
 		return Math.max(duration, 0);
 	}
 
 	function filteredRows() {
 		var iso = toISODate(currentDate);
-		return data.filter(function (row) { return row.date === iso; }).filter(function (row) {
+		return attendanceData.filter(function (row) { 
+			return row.date === iso; 
+		}).filter(function (row) {
 			if (!searchTerm) return true;
-			var blob = (row.name + ' ' + row.empId + ' ' + row.role).toLowerCase();
+			var blob = (row.employee_name + ' ' + row.employee_id + ' ' + (row.position || '')).toLowerCase();
 			return blob.indexOf(searchTerm.toLowerCase()) !== -1;
 		});
 	}
@@ -298,7 +331,7 @@
 		var rows = filteredRows();
 
 		if (!rows.length) {
-			body.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No attendance found for this day.</td></tr>';
+			body.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No attendance found for this day.</td></tr>';
 			renderSummary({ present: 0, absent: 0, leave: 0, total: 0, payable: 0 });
 			return;
 		}
@@ -307,21 +340,99 @@
 		rows.forEach(function (row) {
 			var tr = document.createElement('tr');
 			var workMins = computeWorkMinutes(row);
-			var extra = workMins !== null ? Math.max(workMins - 480, 0) : null; // above 8h
-			var statusClass = row.status === 'present' ? 'dot-present' : row.status === 'leave' ? 'dot-leave' : 'dot-absent';
-			var statusLabel = row.status.charAt(0).toUpperCase() + row.status.slice(1);
+			var extra = workMins !== null ? Math.max(workMins - 480, 0) : null;
+			var status = (row.status || 'present').toLowerCase();
+			var statusClass = status === 'present' ? 'dot-present' : status === 'absent' ? 'dot-absent' : 'dot-leave';
+			var statusLabel = (row.status || 'Present').charAt(0).toUpperCase() + (row.status || 'Present').slice(1).toLowerCase();
+			
+			var approvalStatus = (row.approval_status || 'Pending').toLowerCase();
+			var approvalBadge = '';
+			if (approvalStatus === 'pending') {
+				approvalBadge = '<span class="badge badge-warning">Pending</span>';
+			} else if (approvalStatus === 'approved') {
+				approvalBadge = '<span class="badge bg-success">Approved</span>';
+			} else if (approvalStatus === 'rejected') {
+				approvalBadge = '<span class="badge bg-danger">Rejected</span>';
+			}
+			
+			var actions = '';
+			if (approvalStatus === 'pending') {
+				actions = '<div class="action-btns">' +
+					'<button class="btn-approve" onclick="approveAttendance(' + row.attendance_id + ')">✓ Approve</button>' +
+					'<button class="btn-reject" onclick="rejectAttendance(' + row.attendance_id + ')">✕ Reject</button>' +
+					'</div>';
+			} else {
+				actions = approvalBadge;
+			}
 
 			tr.innerHTML = '' +
-				'<td><div class="fw-bold">' + row.name + '</div><div class="text-muted small">' + row.empId + ' · ' + row.role + '</div></td>' +
-				'<td>' + (row.checkIn ? row.checkIn : '-') + '</td>' +
-				'<td>' + (row.checkOut ? row.checkOut : '-') + '</td>' +
+				'<td><div class="fw-bold">' + row.employee_name + '</div><div class="text-muted small">' + row.employee_id + ' · ' + (row.position || 'N/A') + '</div></td>' +
+				'<td>' + (row.check_in_time ? row.check_in_time : '-') + '</td>' +
+				'<td>' + (row.check_out_time ? row.check_out_time : '-') + '</td>' +
 				'<td>' + (workMins !== null ? minutesToHHMM(workMins) : '-') + '</td>' +
 				'<td>' + (extra !== null && extra > 0 ? '+' + minutesToHHMM(extra) : '0:00') + '</td>' +
-				'<td><span class="status-dot ' + statusClass + '"></span>' + statusLabel + '</td>';
+				'<td><span class="status-dot ' + statusClass + '"></span>' + statusLabel + '</td>' +
+				'<td>' + actions + '</td>';
 			body.appendChild(tr);
 		});
 
 		renderSummary(summarize(rows));
+	}
+
+	async function approveAttendance(attendanceId) {
+		if (!confirm('Approve this attendance?')) return;
+		
+		try {
+			const response = await fetch(API_BASE + '/admin/attendance.php', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include',
+				body: JSON.stringify({
+					attendance_id: attendanceId,
+					action: 'approve'
+				})
+			});
+
+			const data = await response.json();
+			if (data.success) {
+				alert('Attendance approved!');
+				await loadAttendanceData();
+				renderTable();
+			} else {
+				alert(data.message || 'Failed to approve');
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			alert('Failed to approve attendance');
+		}
+	}
+
+	async function rejectAttendance(attendanceId) {
+		if (!confirm('Reject this attendance?')) return;
+		
+		try {
+			const response = await fetch(API_BASE + '/admin/attendance.php', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include',
+				body: JSON.stringify({
+					attendance_id: attendanceId,
+					action: 'reject'
+				})
+			});
+
+			const data = await response.json();
+			if (data.success) {
+				alert('Attendance rejected!');
+				await loadAttendanceData();
+				renderTable();
+			} else {
+				alert(data.message || 'Failed to reject');
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			alert('Failed to reject attendance');
+		}
 	}
 
 	function shiftDay(delta) {
@@ -330,12 +441,15 @@
 		var monthNow = (new Date()).getMonth();
 		if (next.getMonth() !== monthNow) return; // keep within current month per requirement
 		currentDate = next;
-		renderTable();
+		loadAttendanceData().then(function() { renderTable(); });
 	}
 
 	document.getElementById('prevDay').addEventListener('click', function () { shiftDay(-1); });
 	document.getElementById('nextDay').addEventListener('click', function () { shiftDay(1); });
-	document.getElementById('todayBtn').addEventListener('click', function () { currentDate = new Date(); renderTable(); });
+	document.getElementById('todayBtn').addEventListener('click', function () { 
+		currentDate = new Date(); 
+		loadAttendanceData().then(function() { renderTable(); });
+	});
 	document.getElementById('searchInput').addEventListener('input', function (e) { searchTerm = e.target.value.trim(); renderTable(); });
 
 	document.getElementById('addEntryBtn').addEventListener('click', function () {
@@ -345,11 +459,11 @@
 	document.getElementById('exportCsvBtn').addEventListener('click', function () {
 		var rows = filteredRows();
 		if (!rows.length) { alert('No data to export for this day.'); return; }
-		var lines = ['Date,Employee ID,Name,Role,Check In,Check Out,Status,Work Minutes,Extra Minutes'];
+		var lines = ['Date,Employee ID,Name,Position,Check In,Check Out,Status,Approval,Work Minutes,Extra Minutes'];
 		rows.forEach(function (r) {
 			var workMins = computeWorkMinutes(r);
 			var extra = workMins !== null ? Math.max(workMins - 480, 0) : '';
-			lines.push([r.date, r.empId, r.name, r.role, r.checkIn || '', r.checkOut || '', r.status, workMins !== null ? workMins : '', extra].join(','));
+			lines.push([r.date, r.employee_id, r.employee_name, r.position || '', r.check_in_time || '', r.check_out_time || '', r.status || '', r.approval_status || '', workMins !== null ? workMins : '', extra].join(','));
 		});
 		var blob = new Blob([lines.join('\n')], { type: 'text/csv' });
 		var url = URL.createObjectURL(blob);
@@ -362,9 +476,11 @@
 		URL.revokeObjectURL(url);
 	});
 
-	// Initialize
-	renderTable();
-</script>
+	// Initialize - load data first
+	document.addEventListener('DOMContentLoaded', async function() {
+		await loadAttendanceData();
+		renderTable();
+	});</script>
 
 </body>
 </html>

@@ -346,7 +346,18 @@ function loadAdminNavbar() {
     if (!host) return;
     fetch('navbar.html')
         .then(function (res) { return res.text(); })
-        .then(function (html) { host.innerHTML = html; })
+        .then(function (html) {
+            host.innerHTML = html;
+            host.querySelectorAll('script').forEach(function (oldScript) {
+                var s = document.createElement('script');
+                if (oldScript.src) {
+                    s.src = oldScript.src;
+                } else {
+                    s.textContent = oldScript.textContent;
+                }
+                host.appendChild(s);
+            });
+        })
         .catch(function (err) { console.error('Failed to load navbar', err); });
 }
 

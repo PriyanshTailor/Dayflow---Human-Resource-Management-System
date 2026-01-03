@@ -652,68 +652,97 @@ function loadAdminNavbar() {
     if (!host) return;
     fetch('navbar.html')
         .then(res => res.text())
-        .then(html => host.innerHTML = html)
+        .then(html => {
+            host.innerHTML = html;
+            host.querySelectorAll('script').forEach(oldScript => {
+                const s = document.createElement('script');
+                if (oldScript.src) {
+                    s.src = oldScript.src;
+                } else {
+                    s.textContent = oldScript.textContent;
+                }
+                host.appendChild(s);
+            });
+        })
         .catch(err => console.error(err));
 }
-document.addEventListener('DOMContentLoaded', loadAdminNavbar);
 
-/* Sample Employee Data */
-const employeeData = {
-    id: 'EMP101',
-    name: 'John Doe',
-    role: 'Product Manager',
-    department: 'Product Management',
-    email: 'john.doe@dayflow.com',
-    phone: '+91-9876543210',
-    joiningDate: '15/03/2023',
-    status: 'Present',
-    workingHours: 160,
-    workingDays: 20,
-    leavesLeft: 12,
-    monthlySalary: 50000,
-    extraHourRate: 500,
-    extraHours: 12,
-    hobbies: ['Photography', 'Traveling', 'Reading', 'Hiking'],
-    certifications: ['Google Analytics Certified', 'AWS Solutions Architect', 'Project Management Professional (PMP)', 'Scrum Master Certified'],
-    skills: ['Product Strategy', 'Data Analysis', 'User Research', 'Wireframing', 'SQL', 'Python'],
-    languages: [
-        { lang: 'English', level: 'Fluent' },
-        { lang: 'Hindi', level: 'Fluent' },
-        { lang: 'Spanish', level: 'Basic' }
-    ]
-};
+const API_BASE = '/hrms/backend';
+let employeeData = null;
+
+/* Load Employee Data from Backend */
+async function loadEmployeeData() {
+    // Get user ID from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('id');
+    
+    if (!userId) {
+        alert('No employee ID provided');
+        window.location.href = 'dashboard.html';
+        return;
+    }
+    
+    try {
+        const response = await fetch(API_BASE + `/admin/employees.php?id=${userId}`, {
+            credentials: 'include'
+        });
+        
+        if (response.status === 401) {
+            window.location.href = '/hrms/frontend/auth/login.html';
+            return;
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.employee) {
+            employeeData = data.employee;
+            initPage();
+        } else {
+            alert('Employee not found');
+            window.location.href = 'dashboard.html';
+        }
+    } catch (error) {
+        console.error('Error loading employee:', error);
+        alert('Failed to load employee data');
+    }
+}
 
 /* Initialize Page */
 function initPage() {
+    if (!employeeData) return;
+    
     // Avatar initials
-    const initials = employeeData.name.split(' ').map(n => n[0]).join('');
+    const initials = employeeData.full_name.split(' ').map(n => n[0]).join('').toUpperCase();
     document.getElementById('empAvatar').textContent = initials;
     
     // Header
-    document.getElementById('empName').textContent = employeeData.name;
-    document.getElementById('empRole').textContent = `${employeeData.role} • ${employeeData.id}`;
+    document.getElementById('empName').textContent = employeeData.full_name;
+    document.getElementById('empRole').textContent = `${employeeData.role || 'Employee'} • ${employeeData.employee_id}`;
     
     // Overview tab
-    document.getElementById('workingHours').textContent = employeeData.workingHours;
-    document.getElementById('workingDays').textContent = employeeData.workingDays;
-    document.getElementById('leavesLeft').textContent = employeeData.leavesLeft;
-    document.getElementById('empStatus').textContent = employeeData.status;
+    document.getElementById('workingHours').textContent = employeeData.working_hours || 0;
+    document.getElementById('workingDays').textContent = employeeData.working_days || 0;
+    document.getElementById('leavesLeft').textContent = employeeData.leaves_left || 0;
+    document.getElementById('empStatus').textContent = employeeData.attendance_status || 'Unknown';
     
     // Personal info
-    document.getElementById('fullName').textContent = employeeData.name;
-    document.getElementById('empId').textContent = employeeData.id;
-    document.getElementById('department').textContent = employeeData.department;
+    document.getElementById('fullName').textContent = employeeData.full_name;
+    document.getElementById('empId').textContent = employeeData.employee_id;
+    document.getElementById('department').textContent = employeeData.department || 'N/A';
     document.getElementById('email').textContent = employeeData.email;
-    document.getElementById('phone').textContent = employeeData.phone;
-    document.getElementById('joiningDate').textContent = employeeData.joiningDate;
+    document.getElementById('phone').textContent = employeeData.phone || 'N/A';
+    document.getElementById('joiningDate').textContent = employeeData.joining_date || 'N/A';
     
     // Salary tab
-    document.getElementById('monthlySalary').value = employeeData.monthlySalary;
-    document.getElementById('extraHourRate').value = employeeData.extraHourRate;
-    document.getElementById('extraHours').textContent = employeeData.extraHours;
-    document.getElementById('extraEarnings').textContent = `₹${(employeeData.extraHours * employeeData.extraHourRate).toLocaleString('en-IN')}`;
-    
-    calculateSalaryComponents();
+    if (employeeData.basic_salary) {
+        document.getElementById('monthlySalary').value = employeeData.basic_salary;
+        document.getElementById('extraHourRate').value = employeeData.extra_hour_rate || 0;
+        document.getElementById('extraHours').textContent = employeeData.extra_hours || 0;
+        const extraEarnings = (employeeData.extra_hours || 0) * (employeeData.extra_hour_rate || 0);
+        document.getElementById('extraEarnings').textContent = `₹${extraEarnings.toLocaleString('en-IN')}`;
+        
+        calculateSalaryComponents();
+    }
 }
 
 /* Calculate Salary Components */
@@ -739,7 +768,7 @@ function calculateSalaryComponents() {
 }
 
 /* Save Salary */
-function saveSalary() {
+async function saveSalary() {
     const monthlySalary = document.getElementById('monthlySalary').value;
     const extraHourRate = document.getElementById('extraHourRate').value;
     
@@ -748,17 +777,40 @@ function saveSalary() {
         return;
     }
     
-    employeeData.monthlySalary = parseFloat(monthlySalary);
-    employeeData.extraHourRate = parseFloat(extraHourRate);
-    
-    alert(`✓ Salary updated for ${employeeData.name}`);
+    try {
+        const response = await fetch(API_BASE + '/admin/update-employee.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                user_id: employeeData.user_id,
+                basic_salary: parseFloat(monthlySalary),
+                extra_hour_rate: parseFloat(extraHourRate)
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(`✓ Salary updated for ${employeeData.full_name}`);
+            employeeData.basic_salary = parseFloat(monthlySalary);
+            employeeData.extra_hour_rate = parseFloat(extraHourRate);
+        } else {
+            alert(data.message || 'Failed to update salary');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to update salary');
+    }
 }
 
 /* Reset Salary */
 function resetSalary() {
-    document.getElementById('monthlySalary').value = employeeData.monthlySalary;
-    document.getElementById('extraHourRate').value = employeeData.extraHourRate;
-    calculateSalaryComponents();
+    if (employeeData) {
+        document.getElementById('monthlySalary').value = employeeData.basic_salary || 0;
+        document.getElementById('extraHourRate').value = employeeData.extra_hour_rate || 0;
+        calculateSalaryComponents();
+    }
 }
 
 /* Go Back */
@@ -767,7 +819,10 @@ function goBack() {
 }
 
 // Initialize on load
-document.addEventListener('DOMContentLoaded', initPage);
+document.addEventListener('DOMContentLoaded', function() {
+    loadAdminNavbar();
+    loadEmployeeData();
+});
 </script>
 
 </body>

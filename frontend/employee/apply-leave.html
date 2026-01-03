@@ -453,24 +453,52 @@ table tbody td:first-child {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    const API_BASE = '/hrms/backend';
+    let leaveData = [];
+
     function loadEmployeeNavbar() {
         var host = document.getElementById('employee-navbar');
         if (!host) return;
         fetch('navbar.html')
             .then(function (res) { return res.text(); })
-            .then(function (html) { host.innerHTML = html; })
+            .then(function (html) {
+                host.innerHTML = html;
+                // execute inline scripts inside the loaded navbar
+                host.querySelectorAll('script').forEach(function (oldScript) {
+                    var newScript = document.createElement('script');
+                    if (oldScript.src) {
+                        newScript.src = oldScript.src;
+                    } else {
+                        newScript.textContent = oldScript.textContent;
+                    }
+                    host.appendChild(newScript);
+                });
+            })
             .catch(function (err) { console.error('Failed to load navbar', err); });
     }
 
-    document.addEventListener('DOMContentLoaded', loadEmployeeNavbar);
-
-    // Sample leave data for the logged-in employee
-    var leaveData = [
-        { name: 'John Doe', startDate: '2025-12-20', endDate: '2025-12-22', type: 'Paid Time Off', status: 'approved' },
-        { name: 'John Doe', startDate: '2025-11-15', endDate: '2025-11-15', type: 'Sick Leave', status: 'approved' },
-        { name: 'John Doe', startDate: '2026-01-10', endDate: '2026-01-12', type: 'Paid Time Off', status: 'pending' },
-        { name: 'John Doe', startDate: '2025-10-28', endDate: '2025-10-28', type: 'Paid Time Off', status: 'approved' }
-    ];
+    // Load leave requests from database
+    async function loadLeaveData() {
+        try {
+            const response = await fetch(API_BASE + '/employee/leave.php', {
+                credentials: 'include'
+            });
+            
+            if (response.status === 401) {
+                window.location.href = '/hrms/frontend/auth/login.html';
+                return;
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                leaveData = data.data || [];
+                renderLeaveTable();
+            }
+        } catch (error) {
+            console.error('Error loading leave data:', error);
+        }
+    }
 
     function formatDate(dateStr) {
         var d = new Date(dateStr);
@@ -489,32 +517,40 @@ table tbody td:first-child {
         
         // Sort by start date (newest first)
         var sortedData = leaveData.sort(function(a, b) {
-            return new Date(b.startDate) - new Date(a.startDate);
+            return new Date(b.start_date) - new Date(a.start_date);
         });
 
         sortedData.forEach(function (leave) {
             var tr = document.createElement('tr');
-            var statusClass = 'status-' + leave.status;
+            var statusClass = 'status-' + leave.status.toLowerCase();
             var statusLabel = leave.status.charAt(0).toUpperCase() + leave.status.slice(1);
 
             tr.innerHTML = '' +
-                '<td>' + leave.name + '</td>' +
-                '<td>' + formatDate(leave.startDate) + '</td>' +
-                '<td>' + formatDate(leave.endDate) + '</td>' +
-                '<td>' + leave.type + '</td>' +
+                '<td>' + (leave.employee_name || '-') + '</td>' +
+                '<td>' + formatDate(leave.start_date) + '</td>' +
+                '<td>' + formatDate(leave.end_date) + '</td>' +
+                '<td>' + leave.leave_type + '</td>' +
                 '<td><span class="status-badge ' + statusClass + '">' + statusLabel + '</span></td>';
             body.appendChild(tr);
         });
     }
 
     // Show/hide attachment field based on leave type
-    document.getElementById('leaveType').addEventListener('change', function() {
-        var attachmentSection = document.getElementById('attachmentSection');
-        if (this.value === 'sick') {
-            attachmentSection.style.display = 'block';
-        } else {
-            attachmentSection.style.display = 'none';
-        }
+    document.addEventListener('DOMContentLoaded', function() {
+        loadEmployeeNavbar();
+        loadLeaveData();
+        
+        document.getElementById('leaveType').addEventListener('change', function() {
+            var attachmentSection = document.getElementById('attachmentSection');
+            if (this.value === 'sick') {
+                attachmentSection.style.display = 'block';
+            } else {
+                attachmentSection.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('startDate').addEventListener('change', calculateDays);
+        document.getElementById('endDate').addEventListener('change', calculateDays);
     });
 
     // Calculate days when dates change
@@ -534,18 +570,21 @@ table tbody td:first-child {
         }
     }
 
-    document.getElementById('startDate').addEventListener('change', calculateDays);
-    document.getElementById('endDate').addEventListener('change', calculateDays);
-
-    // Submit leave request
-    function submitLeave() {
+    // Submit leave request to backend
+    async function submitLeave() {
         var leaveType = document.getElementById('leaveType').value;
         var startDate = document.getElementById('startDate').value;
         var endDate = document.getElementById('endDate').value;
         var leaveDays = document.getElementById('leaveDays').value;
         var reason = document.getElementById('reason').value;
 
-        if (!leaveType || !startDate || !endDate) {
+        var leaveTypeMapped = {
+            'paid': 'Paid',
+            'sick': 'Sick',
+            'unpaid': 'Unpaid'
+        }[leaveType];
+
+        if (!leaveTypeMapped || !startDate || !endDate) {
             alert('Please fill all required fields');
             return;
         }
@@ -558,36 +597,40 @@ table tbody td:first-child {
             return;
         }
 
-        // Map leave type values to display names
-        var typeMap = {
-            'paid': 'Paid Time Off',
-            'sick': 'Sick Leave',
-            'unpaid': 'Unpaid Leave'
-        };
-
-        // Add new leave request to data
-        var newLeave = {
-            name: 'John Doe',
-            startDate: startDate,
-            endDate: endDate,
-            type: typeMap[leaveType],
-            status: 'pending'
-        };
-
-        leaveData.push(newLeave);
-        renderLeaveTable();
-
-        // Close modal and reset form
-        var modal = bootstrap.Modal.getInstance(document.getElementById('applyLeaveModal'));
-        modal.hide();
-        document.getElementById('leaveForm').reset();
-        document.getElementById('attachmentSection').style.display = 'none';
-
-        alert('Leave request submitted successfully! Your request is pending approval.');
+        try {
+            const response = await fetch(API_BASE + '/employee/leave.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    leave_type: leaveTypeMapped,
+                    start_date: startDate,
+                    end_date: endDate,
+                    reason: reason
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                alert('Leave request submitted successfully!');
+                
+                // Close modal and reset form
+                var modal = bootstrap.Modal.getInstance(document.getElementById('applyLeaveModal'));
+                modal.hide();
+                document.getElementById('leaveForm').reset();
+                document.getElementById('attachmentSection').style.display = 'none';
+                
+                // Reload leave data
+                loadLeaveData();
+            } else {
+                alert(data.message || 'Failed to submit leave request');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to submit leave request');
+        }
     }
-
-    // Initialize table
-    renderLeaveTable();
 </script>
 
 </body>

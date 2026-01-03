@@ -36,7 +36,7 @@
         <img src="../assets/01.jpg" width="34" class="rounded-circle dropdown-toggle" data-bs-toggle="dropdown" alt="Admin avatar">
         <ul class="dropdown-menu dropdown-menu-end">
           <li><a class="dropdown-item" href="profile.html">My Profile</a></li>
-          <li><a class="dropdown-item text-danger" href="#">Log Out</a></li>
+          <li><a class="dropdown-item text-danger" href="#" id="adminLogout">Log Out</a></li>
         </ul>
       </div>
     </div>
@@ -118,6 +118,17 @@
         setStatus(false);
         statusDropdown.hide();
       });
+      // Logout handler
+      var logoutLink = wrapper.querySelector('#adminLogout');
+      if (logoutLink) {
+        logoutLink.addEventListener('click', function (e) {
+          e.preventDefault();
+          fetch('/hrms/backend/auth/logout.php', { method: 'POST', credentials: 'include' })
+            .finally(function () {
+              window.location.href = '/hrms/frontend/auth/login.html';
+            });
+        });
+      }
     })();
   </script>
 </div>
