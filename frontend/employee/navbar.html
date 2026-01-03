@@ -1,22 +1,22 @@
-<div class="admin-navbar-wrapper" id="admin-navbar">
-  <nav class="navbar navbar-expand px-4 admin-navbar">
+<div class="employee-navbar-wrapper" id="employee-navbar">
+  <nav class="navbar navbar-expand px-4 employee-navbar">
     <a class="navbar-brand d-flex align-items-center gap-2" href="dashboard.html">
       <img src="../assets/logo.png" alt="Dayflow Logo" class="navbar-logo">
       <span class="fw-bold">Dayflow</span>
     </a>
 
     <ul class="navbar-nav ms-4">
-      <li class="nav-item"><a class="nav-link" href="dashboard.html">Employees</a></li>
+      <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
       <li class="nav-item"><a class="nav-link" href="attendance.html">Attendance</a></li>
-      <li class="nav-item"><a class="nav-link" href="leave-approvals.html">Time Off</a></li>
+      <li class="nav-item"><a class="nav-link" href="apply-leave.html">Time Off</a></li>
     </ul>
 
     <div class="ms-auto d-flex align-items-center gap-3">
       <div class="dropdown">
-        <div id="adminStatusToggle" class="status-toggle dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Admin Not Checked In">
-          <div id="adminStatus" class="admin-status"></div>
+        <div id="employeeStatusToggle" class="status-toggle dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Not Checked In">
+          <div id="employeeStatus" class="employee-status"></div>
         </div>
-        <div class="dropdown-menu dropdown-menu-end status-menu" aria-labelledby="adminStatusToggle">
+        <div class="dropdown-menu dropdown-menu-end status-menu" aria-labelledby="employeeStatusToggle">
           <div id="checkInPanel">
             <h6 class="text-uppercase text-muted mb-2">Check In</h6>
             <label class="form-label mb-1" for="checkInTime">Pick time</label>
@@ -33,7 +33,7 @@
       </div>
 
       <div class="dropdown">
-        <img src="../assets/01.jpg" width="34" class="rounded-circle dropdown-toggle" data-bs-toggle="dropdown" alt="Admin avatar">
+        <img src="../assets/01.jpg" width="34" class="rounded-circle dropdown-toggle" data-bs-toggle="dropdown" alt="Employee avatar">
         <ul class="dropdown-menu dropdown-menu-end">
           <li><a class="dropdown-item" href="profile.html">My Profile</a></li>
           <li><a class="dropdown-item text-danger" href="#">Log Out</a></li>
@@ -44,12 +44,12 @@
 
   <style>
     .navbar-logo { width: 32px; height: 32px; object-fit: contain; }
-    .admin-navbar { height: 64px; background: linear-gradient(90deg, #7c3aed, #9333ea); box-shadow: 0 14px 40px rgba(17, 24, 39, 0.12); }
-    .admin-navbar .navbar-brand, .admin-navbar .nav-link { color: #ffffff !important; font-weight: 600; letter-spacing: 0.2px; }
-    .admin-navbar .nav-link.active { color: #fef3c7 !important; }
-    .admin-navbar .dropdown-toggle::after { display: none !important; }
-    .admin-status { width: 16px; height: 16px; border-radius: 50%; background: #ef4444; border: 2px solid rgba(255, 255, 255, 0.8); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.14); transition: background 200ms ease, box-shadow 200ms ease; }
-    .admin-status.active { background: #22c55e; box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.18); }
+    .employee-navbar { height: 64px; background: linear-gradient(90deg, #7c3aed, #9333ea); box-shadow: 0 14px 40px rgba(17, 24, 39, 0.12); }
+    .employee-navbar .navbar-brand, .employee-navbar .nav-link { color: #ffffff !important; font-weight: 600; letter-spacing: 0.2px; }
+    .employee-navbar .nav-link.active { color: #fef3c7 !important; }
+    .employee-navbar .dropdown-toggle::after { display: none !important; }
+    .employee-status { width: 16px; height: 16px; border-radius: 50%; background: #ef4444; border: 2px solid rgba(255, 255, 255, 0.8); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.14); transition: background 200ms ease, box-shadow 200ms ease; }
+    .employee-status.active { background: #22c55e; box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.18); }
     .status-toggle { width: 36px; height: 36px; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 12px; display: grid; place-items: center; background: rgba(255, 255, 255, 0.12); cursor: pointer; }
     .status-menu { min-width: 240px; padding: 14px; }
     .status-menu h6 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
@@ -68,8 +68,8 @@
         }
       });
 
-      var statusDot = wrapper.querySelector('#adminStatus');
-      var statusToggle = wrapper.querySelector('#adminStatusToggle');
+      var statusDot = wrapper.querySelector('#employeeStatus');
+      var statusToggle = wrapper.querySelector('#employeeStatusToggle');
       var checkInPanel = wrapper.querySelector('#checkInPanel');
       var checkOutPanel = wrapper.querySelector('#checkOutPanel');
       var checkInBtn = wrapper.querySelector('#checkInBtn');
@@ -87,7 +87,7 @@
       function setStatus(checkedIn) {
         isCheckedIn = checkedIn;
         statusDot.classList.toggle('active', checkedIn);
-        statusToggle.title = checkedIn ? 'Admin Checked In' : 'Admin Not Checked In';
+        statusToggle.title = checkedIn ? 'Checked In' : 'Not Checked In';
         checkInPanel.classList.toggle('d-none', checkedIn);
         checkOutPanel.classList.toggle('d-none', !checkedIn);
       }
@@ -105,7 +105,7 @@
 
       checkInBtn.addEventListener('click', function (e) {
         e.preventDefault();
-        var time = checkInTime.value || currentTimeHHMM();
+        var time = currentTimeHHMM();
         console.log('Checked in at', time);
         setStatus(true);
         statusDropdown.hide();
@@ -113,7 +113,7 @@
 
       checkOutBtn.addEventListener('click', function (e) {
         e.preventDefault();
-        var time = checkOutTime.value || currentTimeHHMM();
+        var time = currentTimeHHMM();
         console.log('Checked out at', time);
         setStatus(false);
         statusDropdown.hide();

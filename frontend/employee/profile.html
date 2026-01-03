@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Profile | Dayflow</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --ink: #0f172a;
+    --muted: #6b7280;
+    --surface: #ffffff;
+    --surface-soft: #f6f4fb;
+    --accent: #7c3aed;
+    --accent-2: #9333ea;
+    --success: #22c55e;
+    --shadow: 0 14px 40px rgba(17, 24, 39, 0.12);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--surface-soft);
+    margin: 0;
+}
+
+/* Profile Card */
+.profile-card {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+}
+
+/* Avatar */
+.avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #e9d5ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--accent);
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+    color: #0f172a;
+    font-weight: 600;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    background: #e9d5ff;
+}
+.nav-tabs .nav-link:hover {
+    color: #0f172a;
+    background: #f3e8ff;
+}
+.nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: var(--accent);
+    color: #ffffff !important;
+}
+
+/* Form */
+.form-label {
+    font-size: 13px;
+    font-weight: 600;
+}
+.form-control,
+.form-select {
+    border-radius: 10px;
+}
+
+/* Salary Box */
+.salary-box {
+    background: #fafafa;
+    border-radius: 14px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+}
+
+.salary-input {
+    background: #f9fafb !important;
+    color: #374151;
+    cursor: not-allowed;
+}
+
+/* Salary tab background for visibility */
+#salary {
+    background: #fdfaff;
+    padding: 16px;
+    border-radius: 14px;
+}
+
+/* Read-only info text */
+.readonly-note {
+    font-size: 13px;
+    color: var(--muted);
+    background: #fef3c7;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    border-left: 3px solid #f59e0b;
+}
+
+.auto-calc-hint {
+    font-size: 11px;
+    color: #9333ea;
+    font-style: italic;
+    margin-top: 4px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div id="employee-navbar"></div>
+
+<!-- CONTENT -->
+<div class="container-fluid px-4 mt-4">
+    <div class="row g-4">
+
+        <!-- LEFT PROFILE -->
+        <div class="col-md-4">
+            <div class="profile-card text-center">
+                <div class="avatar mx-auto mb-3">JD</div>
+                <h5 class="mb-1">John Doe</h5>
+                <small class="text-muted">john.doe@dayflow.com</small>
+
+                <hr>
+
+                <div class="text-start">
+                    <p><strong>Employee ID:</strong> EMP101</p>
+                    <p><strong>Department:</strong> Product</p>
+                    <p><strong>Designation:</strong> Developer</p>
+                    <p><strong>Location:</strong> Ahmedabad</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT DETAILS -->
+        <div class="col-md-8">
+            <div class="profile-card">
+
+                <!-- Tabs -->
+                <ul class="nav nav-tabs mb-3">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#resume">Resume</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#private">Private Info</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#salary">Salary Info</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#security">Security</button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+
+                    <!-- Resume -->
+                    <div class="tab-pane fade show active" id="resume">
+                        <label class="form-label">About</label>
+                        <textarea class="form-control mb-3" rows="4" placeholder="Tell us about yourself..."></textarea>
+
+                        <label class="form-label">Skills</label>
+                        <input class="form-control mb-3" placeholder="e.g., JavaScript, Python, React">
+
+                        <label class="form-label">Certifications</label>
+                        <input class="form-control mb-3" placeholder="e.g., AWS Certified, Google Analytics">
+
+                        <button class="btn btn-primary">Save Changes</button>
+                    </div>
+
+                    <!-- Private Info -->
+                    <div class="tab-pane fade" id="private">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Mobile</label>
+                                <input class="form-control" placeholder="+91 98765 43210">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Residential Address</label>
+                                <input class="form-control" placeholder="Street Address">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nationality</label>
+                                <input class="form-control" placeholder="e.g., Indian">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Personal Email</label>
+                                <input type="email" class="form-control" placeholder="personal@email.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Gender</label>
+                                <select class="form-select">
+                                    <option selected>Select</option>
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Marital Status</label>
+                                <select class="form-select">
+                                    <option selected>Select</option>
+                                    <option>Single</option>
+                                    <option>Married</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Date of Joining</label>
+                                <input type="date" class="form-control">
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h6 class="fw-bold mb-3">Bank Details</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Account Holder Name</label>
+                                <input class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Bank Name</label>
+                                <input class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Account Number</label>
+                                <input class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">IFSC Code</label>
+                                <input class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">PAN Number</label>
+                                <input class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">UAN Number</label>
+                                <input class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">LAN Number</label>
+                                <input class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Employee Code</label>
+                                <input class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <button class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+
+                    <!-- SALARY INFO (READ-ONLY) -->
+                    <div class="tab-pane fade" id="salary">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0">Salary Breakdown</h6>
+                        </div>
+
+                        <div class="readonly-note">
+                            🔒 Salary information is read-only. Contact HR for any changes or queries.
+                        </div>
+
+                        <div class="salary-box">
+
+                            <!-- Wage -->
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Wage Type</label>
+                                    <select class="form-select salary-input" disabled>
+                                        <option selected>Fixed</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Monthly Salary (₹)</label>
+                                    <input type="number" id="monthlySalary" class="form-control salary-input" value="50000" disabled readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Yearly Salary (₹)</label>
+                                    <input type="number" id="yearlySalary" class="form-control salary-input" value="600000" disabled readonly>
+                                    <div class="auto-calc-hint">Auto: Monthly × 12</div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- Components -->
+                            <h6 class="fw-semibold mb-2">Components</h6>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Basic (50%)</label>
+                                    <input type="number" id="basic" class="form-control salary-input" value="25000" disabled readonly>
+                                    <div class="auto-calc-hint">50% of Monthly</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">HRA (25%)</label>
+                                    <input type="number" id="hra" class="form-control salary-input" value="12500" disabled readonly>
+                                    <div class="auto-calc-hint">25% of Monthly</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Allowance (20%)</label>
+                                    <input type="number" id="allowance" class="form-control salary-input" value="10000" disabled readonly>
+                                    <div class="auto-calc-hint">20% of Monthly</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Other (5%)</label>
+                                    <input type="number" id="other" class="form-control salary-input" value="2500" disabled readonly>
+                                    <div class="auto-calc-hint">5% of Monthly</div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- Deductions -->
+                            <h6 class="fw-semibold mb-2">Deductions</h6>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">PF (Provident Fund)</label>
+                                    <input type="number" id="pf" class="form-control salary-input" value="2500" disabled readonly>
+                                    <div class="auto-calc-hint">5% of Monthly</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Professional Tax</label>
+                                    <input type="number" id="tax" class="form-control salary-input" value="200" disabled readonly>
+                                    <div class="auto-calc-hint">Govt. Rate ₹200</div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- Net Salary -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Net Take Home (Monthly)</label>
+                                    <input type="number" id="netSalary" class="form-control salary-input" value="47300" disabled readonly style="background: #f0fdf4 !important; font-weight: 600; font-size: 16px; border: 2px solid #22c55e;">
+                                    <div class="auto-calc-hint">After Deductions</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Security -->
+                    <div class="tab-pane fade" id="security">
+                        <h6 class="fw-bold mb-3">Change Password</h6>
+                        
+                        <label class="form-label">Current Password</label>
+                        <input type="password" class="form-control mb-3" id="currentPassword" placeholder="Enter current password">
+                        
+                        <label class="form-label">New Password</label>
+                        <input type="password" class="form-control mb-3" id="newPassword" placeholder="Enter new password">
+                        
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control mb-3" id="confirmPassword" placeholder="Confirm new password">
+                        
+                        <button class="btn btn-primary" onclick="updatePassword()">Update Password</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Load Employee Navbar
+function loadEmployeeNavbar() {
+    var host = document.getElementById('employee-navbar');
+    if (!host) return;
+    fetch('navbar.html')
+        .then(function (res) { return res.text(); })
+        .then(function (html) { host.innerHTML = html; })
+        .catch(function (err) { console.error('Failed to load navbar', err); });
+}
+
+document.addEventListener('DOMContentLoaded', loadEmployeeNavbar);
+
+/* ===== AUTO-CALCULATION RULES ===== */
+const SALARY_RULES = {
+    basic: 0.50,      // 50% of monthly
+    hra: 0.25,        // 25% of monthly
+    allowance: 0.20,  // 20% of monthly
+    other: 0.05,      // 5% of monthly
+    pf: 0.05,         // 5% of monthly
+    tax: 200          // Fixed ₹200
+};
+
+/* ===== CALCULATE COMPONENTS ON LOAD ===== */
+function calculateNetSalary() {
+    const monthly = parseFloat(document.getElementById('monthlySalary').value) || 0;
+    const pf = parseFloat(document.getElementById('pf').value) || 0;
+    const tax = parseFloat(document.getElementById('tax').value) || 0;
+    
+    const netSalary = monthly - pf - tax;
+    document.getElementById('netSalary').value = netSalary.toFixed(0);
+}
+
+/* ===== PASSWORD UPDATE ===== */
+function updatePassword() {
+    const current = document.getElementById('currentPassword').value;
+    const newPass = document.getElementById('newPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    
+    if (!current || !newPass || !confirm) {
+        alert('Please fill all password fields');
+        return;
+    }
+    
+    if (newPass !== confirm) {
+        alert('New password and confirmation do not match');
+        return;
+    }
+    
+    if (newPass.length < 8) {
+        alert('Password must be at least 8 characters long');
+        return;
+    }
+    
+    // Here you would send to backend
+    alert('Password updated successfully!');
+    
+    // Clear fields
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+}
+
+/* ===== ON PAGE LOAD ===== */
+document.addEventListener('DOMContentLoaded', function () {
+    calculateNetSalary();
+});
+</script>
+
+</body>
+</html>

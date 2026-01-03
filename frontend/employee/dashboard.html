@@ -24,22 +24,8 @@
 body {
     font-family:'Inter',sans-serif;
     background:var(--surface-soft);
+    margin: 0;
 }
-
-/* Navbar */
-.navbar {
-    height:64px;
-    background:linear-gradient(90deg,var(--accent),var(--accent-2));
-}
-.navbar-brand,.nav-link { color:#fff!important;font-weight:600 }
-
-/* Status dot */
-.status-dot {
-    width:14px;height:14px;border-radius:50%;
-    background:var(--danger);
-    border:2px solid #fff;
-}
-.status-dot.active { background:var(--success); }
 
 /* Cards */
 .card-box {
@@ -59,22 +45,8 @@ body {
 
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand px-4">
-    <a class="navbar-brand" href="#">Dayflow</a>
-
-    <ul class="navbar-nav ms-4">
-        <li class="nav-item"><a class="nav-link active" href="#">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Attendance</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Time Off</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">My Profile</a></li>
-    </ul>
-
-    <div class="ms-auto d-flex align-items-center gap-3">
-        <div id="empStatus" class="status-dot" title="Not Checked In"></div>
-        <img src="assets/avatar.png" width="36" class="rounded-circle">
-    </div>
-</nav>
+<!-- EMPLOYEE NAVBAR (IMPORTED) -->
+<div id="employee-navbar"></div>
 
 <!-- CONTENT -->
 <div class="container-fluid px-4 mt-4">
@@ -144,29 +116,212 @@ body {
                 <h5 class="fw-bold mb-3">Time Off</h5>
                 <p><strong>Leave Balance:</strong> 12 days</p>
                 <p><strong>Pending Requests:</strong> 1</p>
-                <button class="btn btn-outline-primary w-100">Apply for Leave</button>
+                <button class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#applyLeaveModal">
+                    Apply for Leave
+                </button>
             </div>
         </div>
 
     </div>
 </div>
 
+<!-- Apply Leave Modal -->
+<div class="modal fade" id="applyLeaveModal" tabindex="-1" aria-labelledby="applyLeaveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); border-bottom: 1px solid #e9d5ff; border-radius: 20px 20px 0 0;">
+                <h5 class="modal-title" id="applyLeaveModalLabel">Time off Type Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding: 28px 24px;">
+                <form id="leaveForm">
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size: 13px; font-weight: 600; color: #0f172a;">Employee</label>
+                        <input type="text" class="form-control" value="John Doe (EMP101)" disabled>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size: 13px; font-weight: 600; color: #0f172a;">Time off Type</label>
+                        <select class="form-select" id="leaveType" required>
+                            <option value="">Select type</option>
+                            <option value="paid">Paid Time Off</option>
+                            <option value="sick">Sick Leave</option>
+                            <option value="unpaid">Unpaid Leave</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size: 13px; font-weight: 600; color: #0f172a;">Validity Period</label>
+                        <div class="row g-2">
+                            <div class="col">
+                                <input type="date" class="form-control" id="startDate" required>
+                            </div>
+                            <div class="col-auto d-flex align-items-center">
+                                <span class="text-muted">To</span>
+                            </div>
+                            <div class="col">
+                                <input type="date" class="form-control" id="endDate" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size: 13px; font-weight: 600; color: #0f172a;">Allocation</label>
+                        <div class="row g-2">
+                            <div class="col">
+                                <input type="number" class="form-control" id="leaveDays" min="0.5" step="0.5" value="1" readonly>
+                            </div>
+                            <div class="col-auto d-flex align-items-center">
+                                <span class="text-muted">Days</span>
+                            </div>
+                        </div>
+                        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #1e40af; margin-top: 12px;">
+                            📅 Number of days will be calculated automatically based on the date range.
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="attachmentSection" style="display: none;">
+                        <label class="form-label" style="font-size: 13px; font-weight: 600; color: #0f172a;">Attachment</label>
+                        <input type="file" class="form-control" id="attachment" accept=".pdf,.jpg,.jpeg,.png">
+                        <small class="text-muted">For sick leave certificate</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size: 13px; font-weight: 600; color: #0f172a;">Reason (Optional)</label>
+                        <textarea class="form-control" id="reason" rows="3" placeholder="Please provide a reason for your leave request..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitLeave()">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- IMPORT EMPLOYEE NAVBAR -->
 <script>
-let checkedIn=false;
-function toggleCheck(){
-    const btn=document.getElementById('checkBtn');
-    const dot=document.getElementById('empStatus');
-    if(!checkedIn){
-        btn.textContent="Check Out";
-        dot.classList.add('active');
-        document.getElementById('inTime').textContent="09:30 AM";
+document.addEventListener('DOMContentLoaded', function () {
+  fetch('navbar.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('employee-navbar').innerHTML = html;
+    })
+    .catch(err => console.error('Employee navbar load failed', err));
+});
+</script>
+
+<!-- DASHBOARD CHECK-IN LOGIC -->
+<script>
+let checkedIn = false;
+let checkInTimestamp = null;
+let checkOutTimestamp = null;
+
+function formatTime(date) {
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    return hours + ':' + minutes + ' ' + ampm;
+}
+
+function calculateWorkingHours(checkIn, checkOut) {
+    const diffMs = checkOut - checkIn;
+    const diffHours = diffMs / (1000 * 60 * 60);
+    return diffHours.toFixed(2);
+}
+
+function toggleCheck() {
+    const btn = document.getElementById('checkBtn');
+    const now = new Date();
+
+    if (!checkedIn) {
+        // Check In
+        checkInTimestamp = now;
+        document.getElementById('inTime').textContent = formatTime(now);
+        btn.textContent = "Check Out";
+        checkedIn = true;
     } else {
-        btn.textContent="Check In";
-        dot.classList.remove('active');
-        document.getElementById('outTime').textContent="06:15 PM";
-        document.getElementById('hours').textContent="8.75";
+        // Check Out
+        checkOutTimestamp = now;
+        document.getElementById('outTime').textContent = formatTime(now);
+        
+        if (checkInTimestamp) {
+            const hours = calculateWorkingHours(checkInTimestamp, checkOutTimestamp);
+            document.getElementById('hours').textContent = hours;
+        }
+        
+        btn.textContent = "Check In";
+        checkedIn = false;
     }
-    checkedIn=!checkedIn;
+}
+
+// Show/hide attachment field based on leave type
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('leaveType').addEventListener('change', function() {
+        var attachmentSection = document.getElementById('attachmentSection');
+        if (this.value === 'sick') {
+            attachmentSection.style.display = 'block';
+        } else {
+            attachmentSection.style.display = 'none';
+        }
+    });
+
+    // Calculate days when dates change
+    document.getElementById('startDate').addEventListener('change', calculateDays);
+    document.getElementById('endDate').addEventListener('change', calculateDays);
+});
+
+function calculateDays() {
+    var startDate = document.getElementById('startDate').value;
+    var endDate = document.getElementById('endDate').value;
+    
+    if (startDate && endDate) {
+        var start = new Date(startDate);
+        var end = new Date(endDate);
+        
+        if (end >= start) {
+            var diffTime = Math.abs(end - start);
+            var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            document.getElementById('leaveDays').value = diffDays;
+        }
+    }
+}
+
+// Submit leave request
+function submitLeave() {
+    var leaveType = document.getElementById('leaveType').value;
+    var startDate = document.getElementById('startDate').value;
+    var endDate = document.getElementById('endDate').value;
+    var leaveDays = document.getElementById('leaveDays').value;
+    var reason = document.getElementById('reason').value;
+
+    if (!leaveType || !startDate || !endDate) {
+        alert('Please fill all required fields');
+        return;
+    }
+
+    var start = new Date(startDate);
+    var end = new Date(endDate);
+    
+    if (end < start) {
+        alert('End date cannot be before start date');
+        return;
+    }
+
+    alert('Leave request submitted successfully! Your request is pending approval.');
+
+    // Close modal and reset form
+    var modal = bootstrap.Modal.getInstance(document.getElementById('applyLeaveModal'));
+    modal.hide();
+    document.getElementById('leaveForm').reset();
+    document.getElementById('attachmentSection').style.display = 'none';
 }
 </script>
 

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>My Attendance | Dayflow</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--ink: #0f172a;
+			--muted: #6b7280;
+			--surface: #ffffff;
+			--surface-soft: #f6f4fb;
+			--accent: #7c3aed;
+			--accent-2: #9333ea;
+			--success: #22c55e;
+			--warning: #eab308;
+			--shadow: 0 14px 40px rgba(17, 24, 39, 0.12);
+		}
+
+		body {
+			font-family: 'Inter', sans-serif;
+			background: var(--surface-soft);
+			color: var(--ink);
+			margin: 0;
+			min-height: 100vh;
+		}
+
+		.page-shell { padding: 28px 32px 40px; }
+		.page-card {
+			background: var(--surface);
+			border-radius: 16px;
+			border: 1px solid #e5e7eb;
+			box-shadow: var(--shadow);
+			padding: 22px 22px 8px;
+		}
+
+		.muted { color: var(--muted); }
+
+		.control-bar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			flex-wrap: wrap;
+			gap: 12px;
+			margin-bottom: 16px;
+		}
+
+		.date-switcher {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.month-selector {
+			background: #f3e8ff;
+			border: 1px solid #e9d5ff;
+			border-radius: 12px;
+			padding: 10px 14px;
+			font-weight: 700;
+			color: #4c1d95;
+			cursor: pointer;
+			min-width: 140px;
+			text-align: center;
+		}
+
+		.arrow-btn {
+			width: 38px;
+			height: 38px;
+			border-radius: 12px;
+			border: 1px solid #e5e7eb;
+			background: #fff;
+			display: grid;
+			place-items: center;
+			font-weight: 700;
+			color: #111827;
+			cursor: pointer;
+		}
+
+		.arrow-btn:hover {
+			background: #f9fafb;
+		}
+
+		.summary-row {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+			gap: 12px;
+			margin: 8px 0 16px;
+		}
+
+		.summary-card {
+			border: 1px solid #e5e7eb;
+			border-radius: 12px;
+			padding: 12px 14px;
+			background: #faf5ff;
+		}
+
+		.summary-title { font-size: 13px; font-weight: 700; color: #5b21b6; margin-bottom: 4px; }
+		.summary-value { font-size: 18px; font-weight: 800; color: #111827; }
+
+		.date-header {
+			background: #eef2ff;
+			border: 1px solid #e0e7ff;
+			border-radius: 12px;
+			padding: 10px 14px;
+			font-weight: 700;
+			color: #312e81;
+			text-align: center;
+			margin-bottom: 16px;
+		}
+
+		table { font-size: 14px; }
+		thead th { background: #f8fafc; font-weight: 700; color: #111827; }
+		tbody td { vertical-align: middle; }
+
+		@media (max-width: 768px) {
+			.control-bar { flex-direction: column; align-items: flex-start; }
+		}
+	</style>
+</head>
+<body>
+
+<div id="employee-navbar"></div>
+
+<div class="page-shell">
+	<div class="page-card">
+		<div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
+			<div>
+				<h4 class="mb-1">Attendance</h4>
+				<p class="mb-0 muted">View your check-in, check-out, and working hours history.</p>
+			</div>
+		</div>
+
+		<div class="control-bar">
+			<div class="date-switcher">
+				<button class="arrow-btn" id="prevMonth" aria-label="Previous month">&#8592;</button>
+				<button class="arrow-btn" id="nextMonth" aria-label="Next month">&#8594;</button>
+				<div class="month-selector" id="monthLabel">--</div>
+			</div>
+		</div>
+
+		<div class="summary-row">
+			<div class="summary-card">
+				<div class="summary-title">Days Present</div>
+				<div class="summary-value" id="daysPresent">0</div>
+			</div>
+			<div class="summary-card">
+				<div class="summary-title">Leaves Count</div>
+				<div class="summary-value" id="leavesCount">0</div>
+			</div>
+			<div class="summary-card">
+				<div class="summary-title">Total Working Days</div>
+				<div class="summary-value" id="workingDays">0</div>
+			</div>
+		</div>
+
+		<div class="date-header" id="selectedDate">22, October 2025</div>
+
+		<div class="table-responsive">
+			<table class="table table-bordered align-middle mb-2" id="attendanceTable">
+				<thead>
+					<tr>
+						<th style="width: 20%">Date</th>
+						<th style="width: 15%">Check In</th>
+						<th style="width: 15%">Check Out</th>
+						<th style="width: 15%">Work Hours</th>
+						<th style="width: 15%">Extra Hours</th>
+					</tr>
+				</thead>
+				<tbody id="attendanceBody">
+					<tr><td colspan="5" class="text-center text-muted py-4">Loading...</td></tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+	function loadEmployeeNavbar() {
+		var host = document.getElementById('employee-navbar');
+		if (!host) return;
+		fetch('navbar.html')
+			.then(function (res) { return res.text(); })
+			.then(function (html) { host.innerHTML = html; })
+			.catch(function (err) { console.error('Failed to load navbar', err); });
+	}
+
+	document.addEventListener('DOMContentLoaded', loadEmployeeNavbar);
+
+	// Sample employee attendance data for logged-in employee
+	var data = [
+		{ date: '2026-01-03', checkIn: '09:58', checkOut: '18:10', breaks: 45 },
+		{ date: '2026-01-02', checkIn: '09:50', checkOut: '18:05', breaks: 40 },
+		{ date: '2025-12-31', checkIn: '10:00', checkOut: '19:00', breaks: 60 },
+		{ date: '2025-12-30', checkIn: '09:45', checkOut: '17:55', breaks: 45 },
+		{ date: '2025-12-27', checkIn: '10:05', checkOut: '18:20', breaks: 50 },
+		{ date: '2025-12-26', checkIn: '09:55', checkOut: '18:00', breaks: 40 },
+		{ date: '2025-12-25', checkIn: null, checkOut: null, breaks: 0 }, // Leave
+		{ date: '2025-12-24', checkIn: '09:50', checkOut: '17:45', breaks: 35 },
+		{ date: '2025-12-23', checkIn: '10:10', checkOut: '19:15', breaks: 60 },
+		{ date: '2025-10-29', checkIn: '10:00', checkOut: '19:00', breaks: 60 },
+		{ date: '2025-10-28', checkIn: '10:00', checkOut: '19:00', breaks: 60 },
+		{ date: '2025-10-27', checkIn: '09:45', checkOut: '18:30', breaks: 50 },
+		{ date: '2025-10-24', checkIn: '10:15', checkOut: '18:45', breaks: 45 },
+		{ date: '2025-10-23', checkIn: '09:55', checkOut: '18:10', breaks: 40 },
+		{ date: '2025-10-22', checkIn: '10:00', checkOut: '19:00', breaks: 60 }
+	];
+
+	var currentMonth = new Date().getMonth();
+	var currentYear = new Date().getFullYear();
+
+	function getMonthName(month, year) {
+		var d = new Date(year, month, 1);
+		return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+	}
+
+	function formatShortDate(dateStr) {
+		var d = new Date(dateStr);
+		return d.toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' });
+	}
+
+	function formatDisplayDate(dateStr) {
+		var d = new Date(dateStr);
+		return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+	}
+
+	function parseTimeToMinutes(t) {
+		if (!t) return null;
+		var parts = t.split(':');
+		return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+	}
+
+	function minutesToHHMM(mins) {
+		var h = Math.floor(mins / 60);
+		var m = mins % 60;
+		return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+	}
+
+	function computeWorkMinutes(entry) {
+		var start = parseTimeToMinutes(entry.checkIn);
+		var end = parseTimeToMinutes(entry.checkOut);
+		if (start === null || end === null) return null;
+		var duration = end - start - (entry.breaks || 0);
+		return Math.max(duration, 0);
+	}
+
+	function filteredRows() {
+		return data.filter(function (row) {
+			var d = new Date(row.date);
+			return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+		}).sort(function (a, b) {
+			return new Date(b.date) - new Date(a.date); // newest first
+		});
+	}
+
+	function calculateStats(rows) {
+		var present = rows.filter(function (r) { return r.checkIn && r.checkOut; }).length;
+		var leaves = rows.filter(function (r) { return !r.checkIn && !r.checkOut; }).length;
+		var workingDays = rows.length;
+		return { present: present, leaves: leaves, workingDays: workingDays };
+	}
+
+	function renderTable() {
+		document.getElementById('monthLabel').textContent = getMonthName(currentMonth, currentYear);
+		
+		var rows = filteredRows();
+		var body = document.getElementById('attendanceBody');
+
+		// Update selected date (show most recent date with data or current date)
+		if (rows.length > 0) {
+			document.getElementById('selectedDate').textContent = formatShortDate(rows[0].date);
+		} else {
+			document.getElementById('selectedDate').textContent = getMonthName(currentMonth, currentYear);
+		}
+
+		// Calculate and display stats
+		var stats = calculateStats(rows);
+		document.getElementById('daysPresent').textContent = stats.present;
+		document.getElementById('leavesCount').textContent = stats.leaves;
+		document.getElementById('workingDays').textContent = stats.workingDays;
+
+		if (!rows.length) {
+			body.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No attendance records found for this month.</td></tr>';
+			return;
+		}
+
+		body.innerHTML = '';
+		rows.forEach(function (row) {
+			var tr = document.createElement('tr');
+			var workMins = computeWorkMinutes(row);
+			var extra = workMins !== null ? Math.max(workMins - 480, 0) : null; // above 8h
+
+			tr.innerHTML = '' +
+				'<td>' + formatDisplayDate(row.date) + '</td>' +
+				'<td>' + (row.checkIn ? row.checkIn : '-') + '</td>' +
+				'<td>' + (row.checkOut ? row.checkOut : '-') + '</td>' +
+				'<td>' + (workMins !== null ? minutesToHHMM(workMins) : '-') + '</td>' +
+				'<td>' + (extra !== null && extra > 0 ? '+' + minutesToHHMM(extra) : '00:00') + '</td>';
+			body.appendChild(tr);
+		});
+	}
+
+	function shiftMonth(delta) {
+		currentMonth += delta;
+		if (currentMonth > 11) {
+			currentMonth = 0;
+			currentYear++;
+		} else if (currentMonth < 0) {
+			currentMonth = 11;
+			currentYear--;
+		}
+		renderTable();
+	}
+
+	document.getElementById('prevMonth').addEventListener('click', function () { shiftMonth(-1); });
+	document.getElementById('nextMonth').addEventListener('click', function () { shiftMonth(1); });
+
+	// Initialize
+	renderTable();
+</script>
+
+</body>
+</html>
