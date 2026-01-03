@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Employee Dashboard | Dayflow</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --ink:#0f172a;
+    --muted:#6b7280;
+    --surface:#ffffff;
+    --surface-soft:#f6f4fb;
+    --accent:#7c3aed;
+    --accent-2:#9333ea;
+    --success:#22c55e;
+    --danger:#ef4444;
+    --shadow:0 14px 40px rgba(17,24,39,.12);
+}
+
+body {
+    font-family:'Inter',sans-serif;
+    background:var(--surface-soft);
+}
+
+/* Navbar */
+.navbar {
+    height:64px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+}
+.navbar-brand,.nav-link { color:#fff!important;font-weight:600 }
+
+/* Status dot */
+.status-dot {
+    width:14px;height:14px;border-radius:50%;
+    background:var(--danger);
+    border:2px solid #fff;
+}
+.status-dot.active { background:var(--success); }
+
+/* Cards */
+.card-box {
+    background:var(--surface);
+    border-radius:16px;
+    padding:20px;
+    box-shadow:var(--shadow);
+}
+
+/* Buttons */
+.btn-primary {
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    border:none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand px-4">
+    <a class="navbar-brand" href="#">Dayflow</a>
+
+    <ul class="navbar-nav ms-4">
+        <li class="nav-item"><a class="nav-link active" href="#">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Attendance</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Time Off</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">My Profile</a></li>
+    </ul>
+
+    <div class="ms-auto d-flex align-items-center gap-3">
+        <div id="empStatus" class="status-dot" title="Not Checked In"></div>
+        <img src="assets/avatar.png" width="36" class="rounded-circle">
+    </div>
+</nav>
+
+<!-- CONTENT -->
+<div class="container-fluid px-4 mt-4">
+    <div class="row g-4">
+
+        <!-- Attendance -->
+        <div class="col-lg-6">
+            <div class="card-box">
+                <h5 class="fw-bold mb-3">Today's Attendance</h5>
+
+                <button id="checkBtn" class="btn btn-primary w-100 mb-3" onclick="toggleCheck()">
+                    Check In
+                </button>
+
+                <div class="row text-center">
+                    <div class="col">
+                        <small class="text-muted">Check In</small>
+                        <div id="inTime" class="fw-semibold">--</div>
+                    </div>
+                    <div class="col">
+                        <small class="text-muted">Check Out</small>
+                        <div id="outTime" class="fw-semibold">--</div>
+                    </div>
+                    <div class="col">
+                        <small class="text-muted">Working Hrs</small>
+                        <div id="hours" class="fw-semibold">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Snapshot -->
+        <div class="col-lg-6">
+            <div class="card-box">
+                <h5 class="fw-bold mb-3">My Info</h5>
+                <p><strong>Name:</strong> John Doe</p>
+                <p><strong>Employee ID:</strong> EMP101</p>
+                <p><strong>Department:</strong> Product</p>
+                <p><strong>Location:</strong> Ahmedabad</p>
+            </div>
+        </div>
+
+        <!-- Monthly Summary -->
+        <div class="col-lg-6">
+            <div class="card-box">
+                <h5 class="fw-bold mb-3">This Month</h5>
+                <div class="row text-center">
+                    <div class="col">
+                        <div class="fs-4 fw-bold">18</div>
+                        <small class="text-muted">Present</small>
+                    </div>
+                    <div class="col">
+                        <div class="fs-4 fw-bold">2</div>
+                        <small class="text-muted">Absent</small>
+                    </div>
+                    <div class="col">
+                        <div class="fs-4 fw-bold">1</div>
+                        <small class="text-muted">Leave</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Off -->
+        <div class="col-lg-6">
+            <div class="card-box">
+                <h5 class="fw-bold mb-3">Time Off</h5>
+                <p><strong>Leave Balance:</strong> 12 days</p>
+                <p><strong>Pending Requests:</strong> 1</p>
+                <button class="btn btn-outline-primary w-100">Apply for Leave</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+let checkedIn=false;
+function toggleCheck(){
+    const btn=document.getElementById('checkBtn');
+    const dot=document.getElementById('empStatus');
+    if(!checkedIn){
+        btn.textContent="Check Out";
+        dot.classList.add('active');
+        document.getElementById('inTime').textContent="09:30 AM";
+    } else {
+        btn.textContent="Check In";
+        dot.classList.remove('active');
+        document.getElementById('outTime').textContent="06:15 PM";
+        document.getElementById('hours').textContent="8.75";
+    }
+    checkedIn=!checkedIn;
+}
+</script>
+
+</body>
+</html>
