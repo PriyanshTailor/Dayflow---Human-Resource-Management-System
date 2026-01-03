@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Employee Profile | Dayflow</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --ink: #1e293b;
+    --ink-light: #475569;
+    --muted: #64748b;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --accent: #7c3aed;
+    --accent-2: #9333ea;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+    --shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+    --shadow-lg: 0 20px 40px rgba(15, 23, 42, 0.12);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    color: var(--ink);
+    margin: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.page-shell {
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.page-card {
+    background: var(--surface);
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: var(--shadow-lg);
+    padding: 32px;
+    transition: box-shadow 0.3s ease;
+}
+
+.page-card:hover {
+    box-shadow: 0 25px 50px rgba(15, 23, 42, 0.15);
+}
+
+.muted { color: var(--muted); }
+
+/* Header Section */
+.emp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.emp-info {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.emp-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: white;
+    font-weight: 700;
+    box-shadow: var(--shadow);
+}
+
+.emp-details h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: var(--ink);
+}
+
+.emp-details p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.back-btn {
+    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+    color: var(--ink);
+    border: none;
+    padding: 10px 18px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    color: var(--ink);
+}
+
+/* Tabs */
+.nav-tabs {
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.nav-tabs .nav-link {
+    color: var(--muted);
+    border: none;
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--accent);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--accent);
+    background: transparent;
+    border: none;
+}
+
+.nav-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-radius: 2px 2px 0 0;
+}
+
+.tab-content {
+    padding-top: 28px;
+}
+
+/* Status Cards */
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.status-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #f0f4ff 100%);
+    border: 1px solid #dbeafe;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.status-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+    border-color: var(--accent);
+}
+
+.status-card-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #0369a1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+.status-card-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0c4a6e;
+}
+
+.status-card-unit {
+    font-size: 12px;
+    color: #0369a1;
+    margin-top: 4px;
+}
+
+/* Section Title */
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.info-field {
+    background: var(--surface-soft);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #f1f5f9;
+}
+
+.info-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+.info-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+/* Salary Section */
+.salary-form-group {
+    margin-bottom: 24px;
+}
+
+.salary-label {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+    outline: none;
+}
+
+.form-control:disabled {
+    background: #f8fafc;
+    color: var(--muted);
+    cursor: not-allowed;
+}
+
+/* Salary Breakdown */
+.salary-breakdown {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    border: 1px solid #e9d5ff;
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 24px;
+}
+
+.breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(124, 58, 237, 0.1);
+}
+
+.breakdown-row:last-child {
+    border-bottom: none;
+}
+
+.breakdown-label {
+    font-weight: 500;
+    color: var(--ink-light);
+    font-size: 14px;
+}
+
+.breakdown-value {
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 16px;
+}
+
+.breakdown-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-top: 2px solid var(--accent);
+    margin-top: 12px;
+}
+
+.breakdown-total-label {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 16px;
+}
+
+.breakdown-total-value {
+    font-weight: 800;
+    color: var(--accent);
+    font-size: 20px;
+}
+
+/* Tags/Pills */
+.tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.tag {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Buttons */
+.btn-group-custom {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-save {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35);
+    color: white;
+}
+
+.btn-cancel {
+    background: #f1f5f9;
+    color: var(--ink);
+    border: 1px solid #e2e8f0;
+    padding: 12px 24px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background: #e2e8f0;
+    color: var(--ink);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-shell {
+        padding: 20px;
+    }
+    
+    .page-card {
+        padding: 20px;
+    }
+    
+    .emp-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .status-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .btn-group-custom {
+        flex-direction: column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="admin-navbar"></div>
+
+<div class="page-shell">
+<div class="page-card">
+
+    <!-- Header -->
+    <div class="emp-header">
+        <div class="emp-info">
+            <div class="emp-avatar" id="empAvatar">JD</div>
+            <div class="emp-details">
+                <h3 id="empName">John Doe</h3>
+                <p id="empRole">Product Manager • EMP101</p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <img src="../assets/logo.png" alt="Dayflow" style="width: 32px; height: 32px; object-fit: contain;">
+            <button class="back-btn" onclick="goBack()">← Back</button>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">Overview</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="salary-tab" data-bs-toggle="tab" data-bs-target="#salary" type="button" role="tab">Salary Management</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab">Skills & Documents</button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+
+        <!-- Overview Tab -->
+        <div class="tab-pane fade show active" id="overview" role="tabpanel">
+            
+            <!-- Status Cards -->
+            <div class="status-grid">
+                <div class="status-card">
+                    <div class="status-card-label">Working Hours</div>
+                    <div class="status-card-value" id="workingHours">160</div>
+                    <div class="status-card-unit">hours/month</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-card-label">Working Days</div>
+                    <div class="status-card-value" id="workingDays">20</div>
+                    <div class="status-card-unit">days/month</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-card-label">Leaves Left</div>
+                    <div class="status-card-value" id="leavesLeft">12</div>
+                    <div class="status-card-unit">days/year</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-card-label">Current Status</div>
+                    <div class="status-card-value" id="empStatus">Present</div>
+                    <div class="status-card-unit" style="color: #16a34a;">● Active</div>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <h6 class="section-title">Personal Information</h6>
+            <div class="info-grid">
+                <div class="info-field">
+                    <div class="info-label">Full Name</div>
+                    <div class="info-value" id="fullName">John Doe</div>
+                </div>
+                <div class="info-field">
+                    <div class="info-label">Employee ID</div>
+                    <div class="info-value" id="empId">EMP101</div>
+                </div>
+                <div class="info-field">
+                    <div class="info-label">Department</div>
+                    <div class="info-value" id="department">Product Management</div>
+                </div>
+                <div class="info-field">
+                    <div class="info-label">Email</div>
+                    <div class="info-value" id="email">john.doe@dayflow.com</div>
+                </div>
+                <div class="info-field">
+                    <div class="info-label">Phone</div>
+                    <div class="info-value" id="phone">+91-9876543210</div>
+                </div>
+                <div class="info-field">
+                    <div class="info-label">Date of Joining</div>
+                    <div class="info-value" id="joiningDate">15/03/2023</div>
+                </div>
+            </div>
+
+            <!-- Hobbies -->
+            <h6 class="section-title">Hobbies & Interests</h6>
+            <div class="info-field">
+                <div class="tag-container" id="hobbiesContainer">
+                    <span class="tag">Photography</span>
+                    <span class="tag">Traveling</span>
+                    <span class="tag">Reading</span>
+                    <span class="tag">Hiking</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Salary Tab -->
+        <div class="tab-pane fade" id="salary" role="tabpanel">
+            
+            <h6 class="section-title">Base Salary Configuration</h6>
+            
+            <div style="max-width: 500px;">
+                <div class="salary-form-group">
+                    <label class="salary-label">Monthly Base Salary (₹)</label>
+                    <input type="number" class="form-control" id="monthlySalary" placeholder="50000" oninput="calculateSalaryComponents()">
+                </div>
+
+                <div class="salary-form-group">
+                    <label class="salary-label">Extra Hours Rate (₹/hour)</label>
+                    <input type="number" class="form-control" id="extraHourRate" placeholder="500" oninput="calculateSalaryComponents()">
+                </div>
+            </div>
+
+            <!-- Salary Breakdown -->
+            <div class="salary-breakdown">
+                <h6 class="section-title" style="border: none; margin: 0 0 16px 0;">Salary Components</h6>
+                
+                <div class="breakdown-row">
+                    <span class="breakdown-label">Basic Salary (50%)</span>
+                    <span class="breakdown-value">₹<span id="basicSalary">0</span></span>
+                </div>
+                <div class="breakdown-row">
+                    <span class="breakdown-label">HRA (25%)</span>
+                    <span class="breakdown-value">₹<span id="hraSalary">0</span></span>
+                </div>
+                <div class="breakdown-row">
+                    <span class="breakdown-label">Allowance (20%)</span>
+                    <span class="breakdown-value">₹<span id="allowanceSalary">0</span></span>
+                </div>
+                <div class="breakdown-row">
+                    <span class="breakdown-label">Other Benefits (5%)</span>
+                    <span class="breakdown-value">₹<span id="otherSalary">0</span></span>
+                </div>
+                <div class="breakdown-row">
+                    <span class="breakdown-label">PF Deduction (5%)</span>
+                    <span class="breakdown-value">- ₹<span id="pfDeduction">0</span></span>
+                </div>
+                <div class="breakdown-row">
+                    <span class="breakdown-label">Tax Deduction</span>
+                    <span class="breakdown-value">- ₹<span id="taxDeduction">200</span></span>
+                </div>
+                
+                <div class="breakdown-total">
+                    <span class="breakdown-total-label">Net Monthly Salary</span>
+                    <span class="breakdown-total-value">₹<span id="netSalary">0</span></span>
+                </div>
+            </div>
+
+            <h6 class="section-title">Extra Hours Information</h6>
+            <div class="info-grid">
+                <div class="info-field">
+                    <div class="info-label">Extra Hours Worked (Dec 2025)</div>
+                    <div class="info-value" id="extraHours">12</div>
+                </div>
+                <div class="info-field">
+                    <div class="info-label">Extra Hours Earnings (Dec 2025)</div>
+                    <div class="info-value" id="extraEarnings">₹6,000</div>
+                </div>
+            </div>
+
+            <div class="btn-group-custom">
+                <button class="btn-save" onclick="saveSalary()">Save Changes</button>
+                <button class="btn-cancel" onclick="resetSalary()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Documents Tab -->
+        <div class="tab-pane fade" id="documents" role="tabpanel">
+            
+            <h6 class="section-title">Certifications</h6>
+            <div class="info-field">
+                <div class="tag-container" id="certificationContainer">
+                    <span class="tag">Google Analytics Certified</span>
+                    <span class="tag">AWS Solutions Architect</span>
+                    <span class="tag">Project Management Professional (PMP)</span>
+                    <span class="tag">Scrum Master Certified</span>
+                </div>
+            </div>
+
+            <h6 class="section-title">Technical Skills</h6>
+            <div class="info-field">
+                <div class="tag-container" id="skillsContainer">
+                    <span class="tag">Product Strategy</span>
+                    <span class="tag">Data Analysis</span>
+                    <span class="tag">User Research</span>
+                    <span class="tag">Wireframing</span>
+                    <span class="tag">SQL</span>
+                    <span class="tag">Python</span>
+                </div>
+            </div>
+
+            <h6 class="section-title">Languages</h6>
+            <div class="info-grid">
+                <div class="info-field">
+                    <div class="info-label">English</div>
+                    <div class="info-value">Fluent</div>
+                </div>
+                <div class="info-field">
+                    <div class="info-label">Hindi</div>
+                    <div class="info-value">Fluent</div>
+                </div>
+                <div class="info-field">
+                    <div class="info-label">Spanish</div>
+                    <div class="info-value">Basic</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function loadAdminNavbar() {
+    var host = document.getElementById('admin-navbar');
+    if (!host) return;
+    fetch('navbar.html')
+        .then(res => res.text())
+        .then(html => host.innerHTML = html)
+        .catch(err => console.error(err));
+}
+document.addEventListener('DOMContentLoaded', loadAdminNavbar);
+
+/* Sample Employee Data */
+const employeeData = {
+    id: 'EMP101',
+    name: 'John Doe',
+    role: 'Product Manager',
+    department: 'Product Management',
+    email: 'john.doe@dayflow.com',
+    phone: '+91-9876543210',
+    joiningDate: '15/03/2023',
+    status: 'Present',
+    workingHours: 160,
+    workingDays: 20,
+    leavesLeft: 12,
+    monthlySalary: 50000,
+    extraHourRate: 500,
+    extraHours: 12,
+    hobbies: ['Photography', 'Traveling', 'Reading', 'Hiking'],
+    certifications: ['Google Analytics Certified', 'AWS Solutions Architect', 'Project Management Professional (PMP)', 'Scrum Master Certified'],
+    skills: ['Product Strategy', 'Data Analysis', 'User Research', 'Wireframing', 'SQL', 'Python'],
+    languages: [
+        { lang: 'English', level: 'Fluent' },
+        { lang: 'Hindi', level: 'Fluent' },
+        { lang: 'Spanish', level: 'Basic' }
+    ]
+};
+
+/* Initialize Page */
+function initPage() {
+    // Avatar initials
+    const initials = employeeData.name.split(' ').map(n => n[0]).join('');
+    document.getElementById('empAvatar').textContent = initials;
+    
+    // Header
+    document.getElementById('empName').textContent = employeeData.name;
+    document.getElementById('empRole').textContent = `${employeeData.role} • ${employeeData.id}`;
+    
+    // Overview tab
+    document.getElementById('workingHours').textContent = employeeData.workingHours;
+    document.getElementById('workingDays').textContent = employeeData.workingDays;
+    document.getElementById('leavesLeft').textContent = employeeData.leavesLeft;
+    document.getElementById('empStatus').textContent = employeeData.status;
+    
+    // Personal info
+    document.getElementById('fullName').textContent = employeeData.name;
+    document.getElementById('empId').textContent = employeeData.id;
+    document.getElementById('department').textContent = employeeData.department;
+    document.getElementById('email').textContent = employeeData.email;
+    document.getElementById('phone').textContent = employeeData.phone;
+    document.getElementById('joiningDate').textContent = employeeData.joiningDate;
+    
+    // Salary tab
+    document.getElementById('monthlySalary').value = employeeData.monthlySalary;
+    document.getElementById('extraHourRate').value = employeeData.extraHourRate;
+    document.getElementById('extraHours').textContent = employeeData.extraHours;
+    document.getElementById('extraEarnings').textContent = `₹${(employeeData.extraHours * employeeData.extraHourRate).toLocaleString('en-IN')}`;
+    
+    calculateSalaryComponents();
+}
+
+/* Calculate Salary Components */
+function calculateSalaryComponents() {
+    const monthlySalary = parseFloat(document.getElementById('monthlySalary').value) || 0;
+    
+    const basic = Math.round(monthlySalary * 0.50);
+    const hra = Math.round(monthlySalary * 0.25);
+    const allowance = Math.round(monthlySalary * 0.20);
+    const other = Math.round(monthlySalary * 0.05);
+    const pf = Math.round(monthlySalary * 0.05);
+    const tax = 200;
+    
+    const netSalary = basic + hra + allowance + other - pf - tax;
+    
+    document.getElementById('basicSalary').textContent = basic.toLocaleString('en-IN');
+    document.getElementById('hraSalary').textContent = hra.toLocaleString('en-IN');
+    document.getElementById('allowanceSalary').textContent = allowance.toLocaleString('en-IN');
+    document.getElementById('otherSalary').textContent = other.toLocaleString('en-IN');
+    document.getElementById('pfDeduction').textContent = pf.toLocaleString('en-IN');
+    document.getElementById('taxDeduction').textContent = tax.toLocaleString('en-IN');
+    document.getElementById('netSalary').textContent = netSalary.toLocaleString('en-IN');
+}
+
+/* Save Salary */
+function saveSalary() {
+    const monthlySalary = document.getElementById('monthlySalary').value;
+    const extraHourRate = document.getElementById('extraHourRate').value;
+    
+    if (!monthlySalary || !extraHourRate) {
+        alert('Please fill all salary fields');
+        return;
+    }
+    
+    employeeData.monthlySalary = parseFloat(monthlySalary);
+    employeeData.extraHourRate = parseFloat(extraHourRate);
+    
+    alert(`✓ Salary updated for ${employeeData.name}`);
+}
+
+/* Reset Salary */
+function resetSalary() {
+    document.getElementById('monthlySalary').value = employeeData.monthlySalary;
+    document.getElementById('extraHourRate').value = employeeData.extraHourRate;
+    calculateSalaryComponents();
+}
+
+/* Go Back */
+function goBack() {
+    window.location.href = 'dashboard.html';
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', initPage);
+</script>
+
+</body>
+</html>

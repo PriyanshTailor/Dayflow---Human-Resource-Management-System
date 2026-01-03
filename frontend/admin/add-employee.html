@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Add New Employee | Dayflow</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --ink: #0f172a;
+    --muted: #6b7280;
+    --surface: #ffffff;
+    --surface-soft: #f6f4fb;
+    --accent: #7c3aed;
+    --accent-2: #9333ea;
+    --shadow: 0 14px 40px rgba(17, 24, 39, 0.12);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--surface-soft);
+    margin: 0;
+}
+
+/* Modal Styling */
+.modal-content {
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    border: none;
+}
+
+.modal-header {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: white;
+    border-radius: 18px 18px 0 0;
+}
+
+.modal-title {
+    font-weight: 700;
+}
+
+.modal-body {
+    padding: 26px;
+}
+
+/* Inputs */
+.form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.form-control,
+.form-select {
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border: none;
+    font-weight: 600;
+    border-radius: 12px;
+    padding: 10px 18px;
+}
+
+.btn-secondary {
+    border-radius: 12px;
+}
+
+/* Section Headings */
+.section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 12px;
+    margin-top: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="admin-navbar"></div>
+
+<!-- Auto-open Modal -->
+<div class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <!-- Header -->
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Employee</h5>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+
+                <div id="alertBox" class="alert alert-danger d-none" role="alert" aria-live="polite"></div>
+
+                <form id="addEmployeeForm" novalidate>
+
+                    <!-- BASIC DETAILS -->
+                    <div class="section-title">Basic Details</div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="empId">Employee ID *</label>
+                            <input id="empId" type="text" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="fullName">Full Name *</label>
+                            <input id="fullName" type="text" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="email">Email *</label>
+                            <input id="email" type="email" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="department">Department *</label>
+                            <select id="department" class="form-select" required>
+                                <option value="" selected>Select department</option>
+                                <option>Product</option>
+                                <option>Design</option>
+                                <option>HR</option>
+                                <option>Engineering</option>
+                                <option>Operations</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- WORK DETAILS -->
+                    <div class="section-title">Work Details</div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="role">Role *</label>
+                            <select id="role" class="form-select" required>
+                                <option value="" selected>Select role</option>
+                                <option>Employee</option>
+                                <option>HR</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Joining Date</label>
+                            <input id="joiningDate" type="date" class="form-control">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="employmentType">Employment Type *</label>
+                            <select id="employmentType" class="form-select" required>
+                                <option value="" selected>Select type</option>
+                                <option>Full Time</option>
+                                <option>Intern</option>
+                                <option>Contract</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="status">Status *</label>
+                            <select id="status" class="form-select" required>
+                                <option value="" selected>Select status</option>
+                                <option>Active</option>
+                                <option>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- OPTIONAL -->
+                    <div class="section-title">Additional</div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="avatar">Upload Avatar</label>
+                            <input id="avatar" type="file" accept="image/*" class="form-control">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="notes">Notes</label>
+                            <input id="notes" type="text" class="form-control" placeholder="Optional remarks">
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" onclick="goBack()">Cancel</button>
+                <button class="btn btn-primary" type="button" onclick="submitEmployee(event)">Save Employee</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function loadAdminNavbar() {
+    var host = document.getElementById('admin-navbar');
+    if (!host) return;
+    fetch('navbar.html')
+        .then(function (res) { return res.text(); })
+        .then(function (html) { host.innerHTML = html; })
+        .catch(function (err) { console.error('Failed to load navbar', err); });
+}
+
+document.addEventListener('DOMContentLoaded', loadAdminNavbar);
+
+const form = document.getElementById('addEmployeeForm');
+const alertBox = document.getElementById('alertBox');
+const idInput = document.getElementById('empId');
+const nameInput = document.getElementById('fullName');
+const emailInput = document.getElementById('email');
+const deptInput = document.getElementById('department');
+const roleInput = document.getElementById('role');
+const typeInput = document.getElementById('employmentType');
+const statusInput = document.getElementById('status');
+const joinInput = document.getElementById('joiningDate');
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const idRegex = /^[A-Za-z0-9._-]{3,}$/;
+
+function submitEmployee(event) {
+    event.preventDefault();
+    const errors = [];
+
+    const empId = idInput.value.trim();
+    const fullName = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const dept = deptInput.value;
+    const role = roleInput.value;
+    const type = typeInput.value;
+    const status = statusInput.value;
+    const joinDate = joinInput.value;
+
+    if (!empId) {
+        errors.push('Employee ID is required.');
+    } else if (!idRegex.test(empId)) {
+        errors.push('Employee ID must be at least 3 characters and can include letters, numbers, dots, underscores, or hyphens.');
+    }
+
+    if (!fullName) {
+        errors.push('Full Name is required.');
+    } else if (fullName.length < 3) {
+        errors.push('Full Name must be at least 3 characters.');
+    }
+
+    if (!email) {
+        errors.push('Email is required.');
+    } else if (!emailRegex.test(email)) {
+        errors.push('Enter a valid email address.');
+    }
+
+    if (!dept) {
+        errors.push('Department is required.');
+    }
+
+    if (!role) {
+        errors.push('Role is required.');
+    }
+
+    if (!type) {
+        errors.push('Employment Type is required.');
+    }
+
+    if (!status) {
+        errors.push('Status is required.');
+    }
+
+    if (joinDate) {
+        const today = new Date().toISOString().slice(0, 10);
+        if (joinDate > today) {
+            errors.push('Joining Date cannot be in the future.');
+        }
+    }
+
+    if (errors.length) {
+        alertBox.classList.remove('d-none', 'alert-success');
+        alertBox.classList.add('alert-danger');
+        alertBox.innerHTML = '<ul class="mb-0">' + errors.map(function (err) {
+            return '<li>' + err + '</li>';
+        }).join('') + '</ul>';
+        return;
+    }
+
+    alertBox.classList.remove('d-none', 'alert-danger');
+    alertBox.classList.add('alert-success');
+    alertBox.textContent = 'Employee added successfully (demo).';
+
+    setTimeout(function () {
+        window.location.href = 'dashboard.html';
+    }, 500);
+}
+
+function goBack() {
+    window.location.href = 'dashboard.html';
+}
+</script>
+
+</body>
+</html>

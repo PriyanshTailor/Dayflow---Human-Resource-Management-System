@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dayflow | Login</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link href="../assets/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <a class="navbar-brand" href="#">
+        <img src="../assets/logo.png" alt="Dayflow Logo">
+        <span>DayFlow - Human Resource Management System</span>
+        <!-- Dayflow -->
+    </a>
+</nav>
+
+<!-- Login Section -->
+<div class="login-wrapper">
+    <div class="login-card">
+
+        <div class="login-logo">
+            <img src="../assets/logo_color.jpeg" alt="Dayflow Logo">
+            <span style="color:#58218d; font-size: larger; font-weight: 700; text-align: center;">DayFlow</span>
+        </div>
+
+        <h5 class="login-title">Sign in to Dayflow</h5>
+        <p class="login-subtitle">Human Resource Management System</p>
+
+        <div id="alertBox" class="alert alert-danger d-none" role="alert" aria-live="polite"></div>
+
+        <form id="loginForm" novalidate>
+            <div class="mb-3">
+                <label class="form-label">Login ID / Email</label>
+                <input id="loginId" type="text" class="form-control" placeholder="Enter your email or ID" autocomplete="username">
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Password</label>
+                <input id="password" type="password" class="form-control" placeholder="Enter your password" autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn-login">
+                Sign In
+            </button>
+        </form>
+
+        <div class="footer-text">
+            Don’t have access?
+            <a href="#">Contact HR Admin</a>
+        </div>
+
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script src="../assets/main.js"></script>
+
+</body>
+</html>

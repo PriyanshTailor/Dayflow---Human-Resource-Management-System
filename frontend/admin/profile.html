@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Profile | Dayflow</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --ink: #0f172a;
+    --muted: #6b7280;
+    --surface: #ffffff;
+    --surface-soft: #f6f4fb;
+    --accent: #7c3aed;
+    --accent-2: #9333ea;
+    --success: #22c55e;
+    --shadow: 0 14px 40px rgba(17, 24, 39, 0.12);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--surface-soft);
+    margin: 0;
+}
+
+/* Navbar */
+.navbar {
+    height: 64px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+.navbar-brand, .nav-link {
+    color: #fff !important;
+    font-weight: 600;
+}
+
+/* Admin Status */
+.admin-status {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--success);
+    border: 2px solid white;
+}
+
+/* Profile Card */
+.profile-card {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+}
+
+/* Avatar */
+.avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #e9d5ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--accent);
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+    color: #0f172a;
+    font-weight: 600;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    background: #e9d5ff;
+}
+.nav-tabs .nav-link:hover {
+    color: #0f172a;
+    background: #f3e8ff;
+}
+.nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: var(--accent);
+    color: #ffffff !important;
+}
+
+/* Form */
+.form-label {
+    font-size: 13px;
+    font-weight: 600;
+}
+.form-control,
+.form-select {
+    border-radius: 10px;
+}
+
+/* Salary Box */
+.salary-box {
+    background: #fafafa;
+    border-radius: 14px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+}
+
+.salary-input:disabled {
+    background: #f9fafb;
+    color: #374151;
+}
+
+/* Salary tab background for visibility */
+#salary {
+    background: #fdfaff;
+    padding: 16px;
+    border-radius: 14px;
+}
+
+/* Disabled info text */
+.salary-note {
+    font-size: 13px;
+    color: var(--muted);
+    background: #f3e8ff;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--accent);
+}
+
+.auto-calc-hint {
+    font-size: 11px;
+    color: #9333ea;
+    font-style: italic;
+    margin-top: 4px;
+}
+
+.locked-field {
+    position: relative;
+}
+
+.locked-field::after {
+    content: '🔒';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div id="admin-navbar"></div>
+
+<!-- CONTENT -->
+<div class="container-fluid px-4 mt-4">
+    <div class="row g-4">
+
+        <!-- LEFT PROFILE -->
+        <div class="col-md-4">
+            <div class="profile-card text-center">
+                <div class="avatar mx-auto mb-3">AD</div>
+                <h5 class="mb-1">Admin Name</h5>
+                <small class="text-muted">admin@dayflow.com</small>
+
+                <hr>
+
+                <div class="text-start">
+                    <p><strong>Company:</strong> Dayflow</p>
+                    <p><strong>Department:</strong> Administration</p>
+                    <p><strong>Role:</strong> Admin</p>
+                    <p><strong>Location:</strong> Ahmedabad</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT DETAILS -->
+        <div class="col-md-8">
+            <div class="profile-card">
+
+                <!-- Tabs -->
+                <ul class="nav nav-tabs mb-3">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#resume">Resume</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#private">Private Info</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#salary">Salary Info</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#security">Security</button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+
+                    <!-- Resume -->
+                    <div class="tab-pane fade show active" id="resume">
+                        <label class="form-label">About</label>
+                        <textarea class="form-control mb-3" rows="4"></textarea>
+
+                        <label class="form-label">Skills</label>
+                        <input class="form-control mb-3">
+
+                        <label class="form-label">Certifications</label>
+                        <input class="form-control">
+                    </div>
+
+                    <!-- Private Info -->
+                    <div class="tab-pane fade" id="private">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Mobile</label>
+                                <input class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">PAN</label>
+                                <input class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Aadhar</label>
+                                <input class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SALARY INFO -->
+                    <div class="tab-pane fade" id="salary">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0">Salary Breakdown</h6>
+                            <button id="editSalaryBtn" class="btn btn-sm btn-outline-primary" onclick="toggleSalaryEdit()">
+                                Edit Salary
+                            </button>
+                        </div>
+
+                        <div id="salaryNote" class="salary-note d-none">
+                            🚫 Salary editing is restricted for your own profile.
+                        </div>
+
+                        <div class="salary-box">
+
+                            <!-- Wage -->
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Wage Type</label>
+                                    <select class="form-select salary-input" disabled>
+                                        <option selected>Fixed</option>
+                                        <option>Hourly</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Monthly Salary (₹)</label>
+                                    <input type="number" id="monthlySalary" class="form-control salary-input" value="50000" disabled oninput="calculateComponents()">
+                                    <div class="auto-calc-hint">Changes auto-calculate components</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Yearly Salary (₹)</label>
+                                    <input type="number" id="yearlySalary" class="form-control salary-input" value="600000" disabled readonly style="background: #e0e7ff;">
+                                    <div class="auto-calc-hint">Auto: Monthly × 12</div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- Components -->
+                            <h6 class="fw-semibold mb-2">Components</h6>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Basic (50%)</label>
+                                    <input type="number" id="basic" class="form-control salary-input" value="25000" disabled readonly style="background: #f0fdf4;">
+                                    <div class="auto-calc-hint">Auto: 50% of Monthly</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">HRA (25%)</label>
+                                    <input type="number" id="hra" class="form-control salary-input" value="12500" disabled readonly style="background: #f0fdf4;">
+                                    <div class="auto-calc-hint">Auto: 25% of Monthly</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Allowance (20%)</label>
+                                    <input type="number" id="allowance" class="form-control salary-input" value="10000" disabled readonly style="background: #f0fdf4;">
+                                    <div class="auto-calc-hint">Auto: 20% of Monthly</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Other (5%)</label>
+                                    <input type="number" id="other" class="form-control salary-input" value="2500" disabled readonly style="background: #f0fdf4;">
+                                    <div class="auto-calc-hint">Auto: 5% of Monthly</div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- Deductions -->
+                            <h6 class="fw-semibold mb-2">Deductions (Locked by Policy)</h6>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6 locked-field">
+                                    <label class="form-label">PF (Provident Fund)</label>
+                                    <input type="number" id="pf" class="form-control" value="2500" disabled readonly style="background: #fef3c7; border: 2px solid #f59e0b;">
+                                    <div class="auto-calc-hint">🔒 Locked: 5% of Monthly</div>
+                                </div>
+                                <div class="col-md-6 locked-field">
+                                    <label class="form-label">Professional Tax</label>
+                                    <input type="number" id="tax" class="form-control" value="200" disabled readonly style="background: #fef3c7; border: 2px solid #f59e0b;">
+                                    <div class="auto-calc-hint">🔒 Locked: Govt. Rate ₹200</div>
+                                </div>
+                            </div>
+
+                            <div class="text-end">
+                                <button id="saveSalaryBtn" class="btn btn-primary d-none" onclick="saveSalary()">
+                                    Save Changes
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Security -->
+                    <div class="tab-pane fade" id="security">
+                        <label class="form-label">Change Password</label>
+                        <input type="password" class="form-control mb-2">
+                        <button class="btn btn-primary">Update Password</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function loadAdminNavbar() {
+    var host = document.getElementById('admin-navbar');
+    if (!host) return;
+    fetch('navbar.html')
+        .then(function (res) { return res.text(); })
+        .then(function (html) { host.innerHTML = html; })
+        .catch(function (err) { console.error('Failed to load navbar', err); });
+}
+
+document.addEventListener('DOMContentLoaded', loadAdminNavbar);
+
+/* ===== CONFIGURATION ===== */
+/* true  → Admin/HR viewing own profile (cannot edit salary)
+   false → Admin viewing another employee (can edit salary) */
+const IS_SELF_PROFILE = true;
+
+/* ===== AUTO-CALCULATION RULES ===== */
+const SALARY_RULES = {
+    basic: 0.50,      // 50% of monthly
+    hra: 0.25,        // 25% of monthly
+    allowance: 0.20,  // 20% of monthly
+    other: 0.05,      // 5% of monthly
+    pf: 0.05,         // 5% of monthly (LOCKED)
+    tax: 200          // Fixed ₹200 (LOCKED)
+};
+
+/* ===== CALCULATE COMPONENTS ===== */
+function calculateComponents() {
+    const monthly = parseFloat(document.getElementById('monthlySalary').value) || 0;
+    
+    // Auto-calculate yearly
+    document.getElementById('yearlySalary').value = (monthly * 12).toFixed(0);
+    
+    // Auto-calculate components
+    document.getElementById('basic').value = (monthly * SALARY_RULES.basic).toFixed(0);
+    document.getElementById('hra').value = (monthly * SALARY_RULES.hra).toFixed(0);
+    document.getElementById('allowance').value = (monthly * SALARY_RULES.allowance).toFixed(0);
+    document.getElementById('other').value = (monthly * SALARY_RULES.other).toFixed(0);
+    
+    // Auto-calculate locked deductions
+    document.getElementById('pf').value = (monthly * SALARY_RULES.pf).toFixed(0);
+    document.getElementById('tax').value = SALARY_RULES.tax;
+}
+
+/* ===== TOGGLE SALARY EDIT ===== */
+function toggleSalaryEdit() {
+    if (IS_SELF_PROFILE) return;
+
+    const monthlyInput = document.getElementById('monthlySalary');
+    const btn = document.getElementById('saveSalaryBtn');
+    
+    monthlyInput.disabled = !monthlyInput.disabled;
+    btn.classList.toggle('d-none');
+}
+
+/* ===== SAVE SALARY ===== */
+function saveSalary() {
+    alert('Salary updated successfully (demo)');
+    toggleSalaryEdit();
+}
+
+/* ===== ON PAGE LOAD ===== */
+document.addEventListener('DOMContentLoaded', function () {
+    // Initialize calculations
+    calculateComponents();
+    
+    // Apply self-profile restrictions
+    if (IS_SELF_PROFILE) {
+        document.getElementById('editSalaryBtn').disabled = true;
+        document.getElementById('salaryNote').classList.remove('d-none');
+    }
+});
+</script>
+
+</body>
+</html>

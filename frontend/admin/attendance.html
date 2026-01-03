@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Attendance | Dayflow</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--ink: #0f172a;
+			--muted: #6b7280;
+			--surface: #ffffff;
+			--surface-soft: #f6f4fb;
+			--accent: #7c3aed;
+			--accent-2: #9333ea;
+			--success: #22c55e;
+			--warning: #eab308;
+			--shadow: 0 14px 40px rgba(17, 24, 39, 0.12);
+		}
+
+		body {
+			font-family: 'Inter', sans-serif;
+			background: var(--surface-soft);
+			color: var(--ink);
+			margin: 0;
+			min-height: 100vh;
+		}
+
+		.page-shell { padding: 28px 32px 40px; }
+		.page-card {
+			background: var(--surface);
+			border-radius: 16px;
+			border: 1px solid #e5e7eb;
+			box-shadow: var(--shadow);
+			padding: 22px 22px 8px;
+		}
+
+		.muted { color: var(--muted); }
+		.pill { padding: 6px 10px; border-radius: 10px; font-weight: 600; font-size: 12px; }
+		.pill.present { background: rgba(34, 197, 94, 0.12); color: #15803d; }
+		.pill.absent { background: rgba(234, 179, 8, 0.16); color: #92400e; }
+		.pill.leave { background: rgba(14, 165, 233, 0.14); color: #075985; }
+
+		.control-bar {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 12px;
+			margin-bottom: 16px;
+		}
+
+		.date-switcher {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.date-chip {
+			background: #f3e8ff;
+			border: 1px solid #e9d5ff;
+			border-radius: 12px;
+			padding: 10px 14px;
+			font-weight: 700;
+			color: #4c1d95;
+			min-width: 180px;
+			text-align: center;
+		}
+
+		.day-chip {
+			background: #eef2ff;
+			border: 1px solid #e0e7ff;
+			border-radius: 12px;
+			padding: 10px 14px;
+			font-weight: 700;
+			color: #312e81;
+			min-width: 120px;
+			text-align: center;
+		}
+
+		.arrow-btn {
+			width: 38px;
+			height: 38px;
+			border-radius: 12px;
+			border: 1px solid #e5e7eb;
+			background: #fff;
+			display: grid;
+			place-items: center;
+			font-weight: 700;
+			color: #111827;
+		}
+
+		.search-wrap {
+			display: flex;
+			gap: 10px;
+			justify-content: flex-end;
+			align-items: center;
+		}
+
+		.search-input {
+			max-width: 280px;
+			border-radius: 12px;
+		}
+
+		.summary-row {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+			gap: 12px;
+			margin: 8px 0 16px;
+		}
+
+		.summary-card {
+			border: 1px solid #e5e7eb;
+			border-radius: 12px;
+			padding: 12px 14px;
+			background: #faf5ff;
+		}
+
+		.summary-title { font-size: 13px; font-weight: 700; color: #5b21b6; margin-bottom: 4px; }
+		.summary-value { font-size: 18px; font-weight: 800; color: #111827; }
+		.summary-sub { font-size: 12px; color: var(--muted); }
+
+		table { font-size: 14px; }
+		thead th { background: #f8fafc; font-weight: 700; color: #111827; }
+		tbody td { vertical-align: middle; }
+		.status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+		.dot-present { background: #22c55e; }
+		.dot-absent { background: #eab308; }
+		.dot-leave { background: #0ea5e9; }
+
+		.badge-soft { background: #eef2ff; color: #4338ca; font-weight: 700; }
+
+		@media (max-width: 768px) {
+			.control-bar { grid-template-columns: 1fr; }
+			.search-wrap { justify-content: flex-start; }
+		}
+	</style>
+</head>
+<body>
+
+<div id="admin-navbar"></div>
+
+<div class="page-shell">
+	<div class="page-card">
+		<div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
+			<div>
+				<h4 class="mb-1">Attendance</h4>
+				<p class="mb-0 muted">Day-wise check-ins, check-outs, and payable-day impact.</p>
+			</div>
+			<div class="d-flex gap-2 flex-wrap">
+				<button class="btn btn-outline-primary btn-sm" type="button" id="exportCsvBtn">Export CSV</button>
+				<button class="btn btn-primary btn-sm" type="button" id="addEntryBtn">Add Entry</button>
+			</div>
+		</div>
+
+		<div class="control-bar">
+			<div class="date-switcher">
+				<button class="arrow-btn" id="prevDay" aria-label="Previous day">&#8592;</button>
+				<button class="arrow-btn" id="nextDay" aria-label="Next day">&#8594;</button>
+				<div class="date-chip" id="dateLabel">--</div>
+				<div class="day-chip" id="dayLabel">--</div>
+				<button class="btn btn-outline-secondary btn-sm" id="todayBtn" type="button">Today</button>
+			</div>
+			<div class="search-wrap">
+				<input id="searchInput" class="form-control search-input" placeholder="Search employee or ID">
+			</div>
+		</div>
+
+		<div class="summary-row" id="summaryRow">
+			<!-- Summary cards injected -->
+		</div>
+
+		<div class="alert alert-warning py-2 mb-3">
+			Attendance drives payroll: payable days drop when an employee is absent or unpaid leave is recorded for a working day.
+		</div>
+
+		<div class="table-responsive">
+			<table class="table table-bordered align-middle mb-2" id="attendanceTable">
+				<thead>
+					<tr>
+						<th style="width: 26%">Employee</th>
+						<th style="width: 14%">Check In</th>
+						<th style="width: 14%">Check Out</th>
+						<th style="width: 14%">Work Hours</th>
+						<th style="width: 14%">Extra Hours</th>
+						<th style="width: 18%">Status</th>
+					</tr>
+				</thead>
+				<tbody id="attendanceBody">
+					<tr><td colspan="6" class="text-center text-muted py-4">Loading...</td></tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+	function loadAdminNavbar() {
+		var host = document.getElementById('admin-navbar');
+		if (!host) return;
+		fetch('navbar.html')
+			.then(function (res) { return res.text(); })
+			.then(function (html) { host.innerHTML = html; })
+			.catch(function (err) { console.error('Failed to load navbar', err); });
+	}
+
+	document.addEventListener('DOMContentLoaded', loadAdminNavbar);
+
+	var data = [
+		{ date: '2026-01-03', empId: 'EMP101', name: 'John Doe', role: 'Product', checkIn: '09:58', checkOut: '18:10', breaks: 45, status: 'present' },
+		{ date: '2026-01-03', empId: 'EMP102', name: 'Alice Smith', role: 'CX', checkIn: null, checkOut: null, breaks: 0, status: 'absent' },
+		{ date: '2026-01-03', empId: 'EMP103', name: 'Robert Lee', role: 'Design', checkIn: '10:10', checkOut: '19:45', breaks: 60, status: 'present' },
+		{ date: '2026-01-03', empId: 'EMP104', name: 'Priya Shah', role: 'HR', checkIn: '08:50', checkOut: '17:15', breaks: 50, status: 'present' },
+		{ date: '2026-01-03', empId: 'EMP105', name: 'David Kim', role: 'Engineering', checkIn: null, checkOut: null, breaks: 0, status: 'leave' },
+		{ date: '2026-01-02', empId: 'EMP101', name: 'John Doe', role: 'Product', checkIn: '09:50', checkOut: '18:05', breaks: 40, status: 'present' },
+		{ date: '2026-01-02', empId: 'EMP102', name: 'Alice Smith', role: 'CX', checkIn: '10:05', checkOut: '18:20', breaks: 55, status: 'present' },
+		{ date: '2026-01-02', empId: 'EMP103', name: 'Robert Lee', role: 'Design', checkIn: '10:30', checkOut: '19:20', breaks: 45, status: 'present' },
+		{ date: '2026-01-02', empId: 'EMP104', name: 'Priya Shah', role: 'HR', checkIn: '09:00', checkOut: '17:10', breaks: 50, status: 'present' },
+		{ date: '2026-01-02', empId: 'EMP105', name: 'David Kim', role: 'Engineering', checkIn: null, checkOut: null, breaks: 0, status: 'leave' }
+	];
+
+	var currentDate = new Date();
+	var searchTerm = '';
+
+	function toISODate(d) {
+		return d.toISOString().slice(0, 10);
+	}
+
+	function formatLongDate(d) {
+		return d.toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' });
+	}
+
+	function formatDay(d) {
+		return d.toLocaleDateString(undefined, { weekday: 'long' });
+	}
+
+	function parseTimeToMinutes(t) {
+		if (!t) return null;
+		var parts = t.split(':');
+		return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+	}
+
+	function minutesToHHMM(mins) {
+		var h = Math.floor(mins / 60);
+		var m = mins % 60;
+		return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+	}
+
+	function computeWorkMinutes(entry) {
+		var start = parseTimeToMinutes(entry.checkIn);
+		var end = parseTimeToMinutes(entry.checkOut);
+		if (start === null || end === null) return null;
+		var duration = end - start - (entry.breaks || 0);
+		return Math.max(duration, 0);
+	}
+
+	function filteredRows() {
+		var iso = toISODate(currentDate);
+		return data.filter(function (row) { return row.date === iso; }).filter(function (row) {
+			if (!searchTerm) return true;
+			var blob = (row.name + ' ' + row.empId + ' ' + row.role).toLowerCase();
+			return blob.indexOf(searchTerm.toLowerCase()) !== -1;
+		});
+	}
+
+	function summarize(rows) {
+		var present = rows.filter(function (r) { return r.status === 'present'; }).length;
+		var absent = rows.filter(function (r) { return r.status === 'absent'; }).length;
+		var leave = rows.filter(function (r) { return r.status === 'leave'; }).length;
+		var total = rows.length;
+		var payable = present + leave; // absent days reduce payable days
+		return { present: present, absent: absent, leave: leave, total: total, payable: payable };
+	}
+
+	function renderSummary(stats) {
+		var host = document.getElementById('summaryRow');
+		host.innerHTML = '';
+		var items = [
+			{ title: 'Present', value: stats.present, tone: 'present', hint: 'Working today' },
+			{ title: 'On Leave', value: stats.leave, tone: 'leave', hint: 'Approved time off' },
+			{ title: 'Absent', value: stats.absent, tone: 'absent', hint: 'Unpaid for the day' },
+			{ title: 'Payable Days (today)', value: stats.payable + ' / ' + stats.total, tone: 'present', hint: 'Absent lowers payable days' }
+		];
+		items.forEach(function (item) {
+			var div = document.createElement('div');
+			div.className = 'summary-card';
+			div.innerHTML = '<div class="summary-title">' + item.title + '</div>' +
+				'<div class="summary-value">' + item.value + '</div>' +
+				'<div class="summary-sub">' + item.hint + '</div>';
+			host.appendChild(div);
+		});
+	}
+
+	function renderTable() {
+		document.getElementById('dateLabel').textContent = formatLongDate(currentDate);
+		document.getElementById('dayLabel').textContent = formatDay(currentDate);
+
+		var body = document.getElementById('attendanceBody');
+		var rows = filteredRows();
+
+		if (!rows.length) {
+			body.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No attendance found for this day.</td></tr>';
+			renderSummary({ present: 0, absent: 0, leave: 0, total: 0, payable: 0 });
+			return;
+		}
+
+		body.innerHTML = '';
+		rows.forEach(function (row) {
+			var tr = document.createElement('tr');
+			var workMins = computeWorkMinutes(row);
+			var extra = workMins !== null ? Math.max(workMins - 480, 0) : null; // above 8h
+			var statusClass = row.status === 'present' ? 'dot-present' : row.status === 'leave' ? 'dot-leave' : 'dot-absent';
+			var statusLabel = row.status.charAt(0).toUpperCase() + row.status.slice(1);
+
+			tr.innerHTML = '' +
+				'<td><div class="fw-bold">' + row.name + '</div><div class="text-muted small">' + row.empId + ' · ' + row.role + '</div></td>' +
+				'<td>' + (row.checkIn ? row.checkIn : '-') + '</td>' +
+				'<td>' + (row.checkOut ? row.checkOut : '-') + '</td>' +
+				'<td>' + (workMins !== null ? minutesToHHMM(workMins) : '-') + '</td>' +
+				'<td>' + (extra !== null && extra > 0 ? '+' + minutesToHHMM(extra) : '0:00') + '</td>' +
+				'<td><span class="status-dot ' + statusClass + '"></span>' + statusLabel + '</td>';
+			body.appendChild(tr);
+		});
+
+		renderSummary(summarize(rows));
+	}
+
+	function shiftDay(delta) {
+		var next = new Date(currentDate);
+		next.setDate(next.getDate() + delta);
+		var monthNow = (new Date()).getMonth();
+		if (next.getMonth() !== monthNow) return; // keep within current month per requirement
+		currentDate = next;
+		renderTable();
+	}
+
+	document.getElementById('prevDay').addEventListener('click', function () { shiftDay(-1); });
+	document.getElementById('nextDay').addEventListener('click', function () { shiftDay(1); });
+	document.getElementById('todayBtn').addEventListener('click', function () { currentDate = new Date(); renderTable(); });
+	document.getElementById('searchInput').addEventListener('input', function (e) { searchTerm = e.target.value.trim(); renderTable(); });
+
+	document.getElementById('addEntryBtn').addEventListener('click', function () {
+		alert('Add Entry: hook this to your real create flow.');
+	});
+
+	document.getElementById('exportCsvBtn').addEventListener('click', function () {
+		var rows = filteredRows();
+		if (!rows.length) { alert('No data to export for this day.'); return; }
+		var lines = ['Date,Employee ID,Name,Role,Check In,Check Out,Status,Work Minutes,Extra Minutes'];
+		rows.forEach(function (r) {
+			var workMins = computeWorkMinutes(r);
+			var extra = workMins !== null ? Math.max(workMins - 480, 0) : '';
+			lines.push([r.date, r.empId, r.name, r.role, r.checkIn || '', r.checkOut || '', r.status, workMins !== null ? workMins : '', extra].join(','));
+		});
+		var blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+		var url = URL.createObjectURL(blob);
+		var a = document.createElement('a');
+		a.href = url;
+		a.download = 'attendance-' + toISODate(currentDate) + '.csv';
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	});
+
+	// Initialize
+	renderTable();
+</script>
+
+</body>
+</html>
